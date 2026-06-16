@@ -88,9 +88,11 @@ const DB = (() => {
   function safe(u) { if (!u) return null; const { password, ...rest } = u; return rest; }
 
   async function getAll() {
-    const { data, error } = await window.db.from('users').select('*').order('id');
-    if (error) { console.error('DB.getAll', error); return []; }
-    return data || [];
+    try {
+      const res = await window.db.from('users').select('*').order('id');
+      if (res.error) { console.error('DB.getAll error:', res.error.message || res.error); return []; }
+      return res.data || [];
+    } catch(e) { console.error('DB.getAll exception:', String(e)); return []; }
   }
   async function getAllSafe() { return (await getAll()).map(safe); }
 
@@ -162,18 +164,24 @@ const DB = (() => {
 // ============================================================
 const SiteDB = (() => {
   async function get() {
-    const [coursesRes, settingsRes, linksRes, videosRes, questionsRes, optionsRes, reviewsRes] = await Promise.all([
-      window.db.from('courses').select('*').order('id'),
-      window.db.from('site_settings').select('*'),
-      window.db.from('useful_links').select('*').order('sort_order'),
-      window.db.from('videos').select('*').order('sort_order'),
-      window.db.from('quiz_questions').select('*').order('sort_order'),
-      window.db.from('quiz_options').select('*').order('option_index'),
-      window.db.from('reviews').select('*').order('id')
-    ]);
+    // طلبات متسلسلة بدل Promise.all لتجنب DataCloneError في بعض المتصفحات
+    const q = async (table, opts) => {
+      let req = window.db.from(table).select('*');
+      if (opts && opts.order) req = req.order(opts.order);
+      const res = await req;
+      return res;
+    };
 
-    if (coursesRes.error) throw new Error('courses: ' + coursesRes.error.message);
-    if (videosRes.error) throw new Error('videos: ' + videosRes.error.message);
+    const coursesRes   = await q('courses',        { order: 'id' });
+    const settingsRes  = await q('site_settings',  null);
+    const linksRes     = await q('useful_links',   { order: 'sort_order' });
+    const videosRes    = await q('videos',         { order: 'sort_order' });
+    const questionsRes = await q('quiz_questions', { order: 'sort_order' });
+    const optionsRes   = await q('quiz_options',   { order: 'option_index' });
+    const reviewsRes   = await q('reviews',        { order: 'id' });
+
+    if (coursesRes.error) throw new Error('courses: ' + (coursesRes.error.message || JSON.stringify(coursesRes.error)));
+    if (videosRes.error)  throw new Error('videos: '  + (videosRes.error.message  || JSON.stringify(videosRes.error)));
 
     const settingsObj = {};
     if (!settingsRes.error && settingsRes.data) {
@@ -603,13 +611,119 @@ function RegisterPage({ handleRegister, setPage, notify }) {
 }
 
 // ============================================================
+// DELETE ACCOUNT MODAL
+// ============================================================
+function DeleteAccountModal({ user, onConfirm, onClose }) {
+  const [step, setStep] = useState(1); // 1=تحذير، 2=تأكيد بالكتابة
+  const [typed, setTyped] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const CONFIRM_WORD = 'احذف حسابي';
+
+  const handleDelete = async () => {
+    if (typed !== CONFIRM_WORD) return;
+    setDeleting(true);
+    await onConfirm();
+    setDeleting(false);
+  };
+
+  return React.createElement('div', { className: 'modal-overlay', onClick: e => e.target === e.currentTarget && onClose() },
+    React.createElement('div', { className: 'modal-box', style: { maxWidth: 460 } },
+
+      // أيقونة التحذير
+      React.createElement('div', { style: { textAlign: 'center', marginBottom: 24 } },
+        React.createElement('div', { style: { width: 72, height: 72, borderRadius: '50%', background: 'rgba(239,68,68,0.12)', border: '2px solid rgba(239,68,68,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, margin: '0 auto 16px' } }, '🗑️'),
+        React.createElement('h2', { style: { fontSize: 20, fontWeight: 800, color: '#f87171', marginBottom: 8 } }, 'حذف الحساب نهائياً'),
+        React.createElement('p', { style: { fontSize: 13, color: '#8888a8', lineHeight: 1.7 } }, 'حذف حسابك أمر دائم ولا يمكن التراجع عنه.')
+      ),
+
+      // صندوق التحذيرات
+      React.createElement('div', { style: { background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 12, padding: '16px 20px', marginBottom: 24 } },
+        React.createElement('p', { style: { fontSize: 13, fontWeight: 700, color: '#f87171', marginBottom: 10 } }, 'ماذا سيحدث عند الحذف:'),
+        [
+          'سيتم حذف حسابك وبياناتك الشخصية خلال 30 يوماً',
+          'لن تتمكن من الوصول إلى دوراتك أو تقدمك الدراسي',
+          'لا يمكن استرجاع الحساب بعد التأكيد',
+          'قد نحتفظ ببعض السجلات لأغراض قانونية'
+        ].map((item, i) =>
+          React.createElement('div', { key: i, style: { display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 6, fontSize: 13, color: '#b0b0c8' } },
+            React.createElement('span', { style: { color: '#f87171', flexShrink: 0, marginTop: 1 } }, '✕'),
+            React.createElement('span', null, item)
+          )
+        )
+      ),
+
+      // حقل التأكيد بالكتابة
+      React.createElement('div', { style: { marginBottom: 24 } },
+        React.createElement('label', { style: { display: 'block', fontSize: 13, color: '#b0b0c8', marginBottom: 8 } },
+          'لتأكيد الحذف، اكتب: ',
+          React.createElement('span', { style: { color: '#f87171', fontWeight: 700, fontFamily: 'monospace' } }, CONFIRM_WORD)
+        ),
+        React.createElement('input', {
+          className: 'input-field',
+          placeholder: 'اكتب هنا للتأكيد...',
+          value: typed,
+          onChange: e => setTyped(e.target.value),
+          style: { borderColor: typed === CONFIRM_WORD ? 'rgba(239,68,68,0.6)' : 'rgba(108,71,255,0.2)' }
+        })
+      ),
+
+      // أزرار
+      React.createElement('div', { style: { display: 'flex', gap: 12 } },
+        React.createElement('button', {
+          onClick: handleDelete,
+          disabled: typed !== CONFIRM_WORD || deleting,
+          style: {
+            flex: 1, padding: '12px', borderRadius: 10, border: 'none', cursor: typed === CONFIRM_WORD ? 'pointer' : 'not-allowed',
+            background: typed === CONFIRM_WORD ? 'linear-gradient(135deg,#dc2626,#ef4444)' : 'rgba(239,68,68,0.2)',
+            color: typed === CONFIRM_WORD ? 'white' : '#f87171', fontWeight: 700, fontSize: 15, transition: 'all 0.2s', fontFamily: 'inherit'
+          }
+        }, deleting ? '⏳ جارٍ الحذف...' : '🗑️ حذف حسابي نهائياً'),
+        React.createElement('button', { className: 'btn-outline', style: { flex: 1 }, onClick: onClose }, 'إلغاء')
+      ),
+
+      // نص قانوني صغير
+      React.createElement('p', { style: { fontSize: 11, color: '#555570', textAlign: 'center', marginTop: 16, lineHeight: 1.6 } },
+        'سيتم حذف بياناتك خلال 30 يوماً. قد نحتفظ ببعض البيانات الوصفية والسجلات لفترة أطول حيثما يقتضي القانون أو يُجيز ذلك.'
+      )
+    )
+  );
+}
+
+// ============================================================
 // STUDENT DASHBOARD
 // ============================================================
-function StudentDashboard({ user, data, setPage, setSelectedCourse }) {
+function StudentDashboard({ user, data, setPage, setSelectedCourse, onDeleteAccount }) {
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
   return React.createElement('div', { style: { padding: 40 } },
-    React.createElement('h1', { style: { fontSize: 26, fontWeight: 700, marginBottom: 8 } }, 'مرحباً، ' + user.name + ' 👋'),
-    React.createElement('p', { style: { color: '#8888a8', marginBottom: 32 } }, 'استمر في رحلتك التعليمية'),
-    React.createElement('div', { className: 'grid-4', style: { marginBottom: 32 } },
+
+    // مودال حذف الحساب
+    showDeleteModal && React.createElement(DeleteAccountModal, {
+      user,
+      onConfirm: async () => { await onDeleteAccount(); setShowDeleteModal(false); },
+      onClose: () => setShowDeleteModal(false)
+    }),
+
+    React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8, flexWrap: 'wrap', gap: 12 } },
+      React.createElement('div', null,
+        React.createElement('h1', { style: { fontSize: 26, fontWeight: 700, marginBottom: 4 } }, 'مرحباً، ' + user.name + ' 👋'),
+        React.createElement('p', { style: { color: '#8888a8' } }, 'استمر في رحلتك التعليمية')
+      ),
+      // زر إعدادات الحساب
+      React.createElement('div', { style: { display: 'flex', gap: 10, alignItems: 'center' } },
+        React.createElement('div', { style: { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(108,71,255,0.2)', borderRadius: 12, padding: '8px 16px', fontSize: 13, color: '#8888a8' } },
+          '📧 ' + user.email
+        ),
+        React.createElement('button', {
+          onClick: () => setShowDeleteModal(true),
+          style: { background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', color: '#f87171', padding: '8px 16px', borderRadius: 10, cursor: 'pointer', fontSize: 13, fontWeight: 600, transition: 'all 0.2s', fontFamily: 'inherit' },
+          onMouseOver: e => e.target.style.background = 'rgba(239,68,68,0.18)',
+          onMouseOut: e => e.target.style.background = 'rgba(239,68,68,0.08)'
+        }, '🗑️ حذف الحساب')
+      )
+    ),
+
+    React.createElement('div', { className: 'grid-4', style: { margin: '32px 0' } },
       [{ v: data.courses.length.toString(), l: 'الدورات المتاحة', c: '#a78bfa' }, { v: '0', l: 'دروس مكتملة', c: '#4ade80' }, { v: '0%', l: 'التقدم الكلي', c: '#38bdf8' }, { v: '0', l: 'شهاداتي', c: '#facc15' }].map((s, i) =>
         React.createElement('div', { key: i, className: 'stat-card' },
           React.createElement('div', { style: { fontSize: 28, fontWeight: 800, color: s.c, marginBottom: 6 } }, s.v),
@@ -1144,7 +1258,8 @@ function App() {
 
   const reloadData = async () => {
     try {
-      const [siteData, users] = await Promise.all([SiteDB.get(), DB.getAllSafe()]);
+      const siteData = await SiteDB.get();
+      const users = await DB.getAllSafe();
       setData({ users, courses: siteData.courses, settings: siteData.settings, links: siteData.links, reviews: siteData.reviews });
       setDbError('');
     } catch (e) { console.error('reloadData', e); }
@@ -1154,12 +1269,14 @@ function App() {
     (async () => {
       setLoading(true);
       try {
-        const [siteData, users] = await Promise.all([SiteDB.get(), DB.getAllSafe()]);
+        const siteData = await SiteDB.get();
+        const users    = await DB.getAllSafe();
         setData({ users, courses: siteData.courses, settings: siteData.settings, links: siteData.links, reviews: siteData.reviews });
         setDbError('');
       } catch (e) {
-        console.error('Init error:', e);
-        setDbError('⚠️ تعذّر الاتصال بقاعدة البيانات. تأكد من تشغيل SQL الإعداد في Supabase ثم أعد تحميل الصفحة.');
+        const msg = e && e.message ? e.message : String(e);
+        console.error('Init error:', msg);
+        setDbError('⚠️ فشل الاتصال: ' + msg + ' — تأكد من تشغيل setup.sql في Supabase ثم أعد التحميل.');
       } finally { setLoading(false); }
     })();
   }, []);
@@ -1183,6 +1300,16 @@ function App() {
 
   const handleLogout = () => { setUser(null); setPage('home'); notify('تم تسجيل الخروج'); };
   const handleRegister = async formData => { const r = await DB.register(formData); if (r.ok) await syncUsers(); return r; };
+  const handleDeleteAccount = async () => {
+    try {
+      await DB.remove(user.id);
+      setUser(null);
+      setPage('home');
+      notify('تم حذف حسابك بنجاح. نتمنى أن نراك مجدداً 👋');
+    } catch(e) {
+      notify('فشل حذف الحساب: ' + e.message, 'error');
+    }
+  };
 
   const navItems = [{ label: 'الرئيسية', id: 'home' }, { label: 'الدورات', id: 'courses' }, { label: 'روابط مفيدة', id: 'links' },
     ...(user && user.role === 'admin' ? [{ label: 'الإدارة', id: 'admin' }] : [])];
@@ -1224,7 +1351,7 @@ function App() {
     page === 'course-view' && React.createElement(CourseViewPage, { course: selectedCourse, setPage, user, notify }),
     page === 'login' && React.createElement(LoginPage, { loginForm, setLoginForm, handleLogin, loginError, setPage, loading: loginLoading }),
     page === 'register' && React.createElement(RegisterPage, { handleRegister, setPage, notify }),
-    page === 'dashboard' && user && React.createElement(StudentDashboard, { user, data, setPage, setSelectedCourse }),
+    page === 'dashboard' && user && React.createElement(StudentDashboard, { user, data, setPage, setSelectedCourse, onDeleteAccount: handleDeleteAccount }),
     page === 'admin' && user && user.role === 'admin' && React.createElement(AdminPanel, { data, setData, adminSection, setAdminSection, setModal, notify, syncUsers, reloadData })
   );
 }
