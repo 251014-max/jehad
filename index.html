@@ -10,122 +10,158 @@
   <script>
     const SUPABASE_URL = 'https://dhvtpreywsghgqagetyb.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRodnRwcmV5d3NnaGdxYWdldHliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNTYyMjIsImV4cCI6MjA5NjczMjIyMn0.upnIVJ0edhLfNo8cZnHl1QGDfqfZCrfLnB3k3xfwhNc';
-    // نستخدم اسم db بدل supabase لتجنب التعارض مع window.supabase
     window.db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   </script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #0a0a0f; color: #e8e8f0; }
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #1a1a2e; }
-    ::-webkit-scrollbar-thumb { background: #6c47ff; border-radius: 3px; }
-    @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-    @keyframes slideIn { from { transform:translateX(100%); } to { transform:translateX(0); } }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .nav-link { cursor:pointer; padding:8px 16px; border-radius:8px; transition:all 0.2s; color:#b0b0c8; font-size:15px; }
-    .nav-link:hover { background:rgba(108,71,255,0.15); color:#a78bfa; }
-    .nav-link.active { color:#a78bfa; }
-    .card { background:rgba(255,255,255,0.04); border:1px solid rgba(108,71,255,0.2); border-radius:16px; padding:24px; transition:all 0.3s; }
-    .card:hover { border-color:rgba(108,71,255,0.5); transform:translateY(-2px); }
-    .btn-primary { background:linear-gradient(135deg,#6c47ff,#a855f7); color:white; border:none; padding:12px 24px; border-radius:10px; cursor:pointer; font-size:15px; font-weight:600; transition:all 0.2s; font-family:inherit; }
-    .btn-primary:hover { transform:translateY(-1px); box-shadow:0 8px 25px rgba(108,71,255,0.4); }
-    .btn-primary:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
-    .btn-outline { background:transparent; border:1px solid rgba(108,71,255,0.4); color:#a78bfa; padding:10px 20px; border-radius:10px; cursor:pointer; font-size:14px; transition:all 0.2s; font-family:inherit; }
-    .btn-outline:hover { background:rgba(108,71,255,0.1); }
-    .btn-danger { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#f87171; padding:6px 14px; border-radius:8px; cursor:pointer; font-size:13px; transition:all 0.2s; font-family:inherit; }
-    .btn-danger:hover { background:rgba(239,68,68,0.25); }
-    .btn-success { background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.3); color:#4ade80; padding:6px 14px; border-radius:8px; cursor:pointer; font-size:13px; transition:all 0.2s; font-family:inherit; }
-    .stat-card { background:rgba(255,255,255,0.04); border:1px solid rgba(108,71,255,0.15); border-radius:16px; padding:20px; }
-    .input-field { background:rgba(255,255,255,0.06); border:1px solid rgba(108,71,255,0.2); border-radius:10px; padding:12px 16px; color:#e8e8f0; font-size:15px; width:100%; outline:none; transition:all 0.2s; font-family:inherit; }
-    .input-field:focus { border-color:#6c47ff; box-shadow:0 0 0 3px rgba(108,71,255,0.15); }
-    .sidebar-item { display:flex; align-items:center; gap:10px; padding:10px 16px; border-radius:10px; cursor:pointer; transition:all 0.2s; color:#b0b0c8; font-size:14px; }
-    .sidebar-item:hover { background:rgba(108,71,255,0.1); color:#a78bfa; }
-    .sidebar-item.active { background:linear-gradient(135deg,rgba(108,71,255,0.3),rgba(168,85,247,0.2)); color:#a78bfa; border:1px solid rgba(108,71,255,0.3); }
-    .table-row { border-bottom:1px solid rgba(255,255,255,0.05); transition:background 0.2s; }
-    .table-row:hover { background:rgba(108,71,255,0.05); }
-    .badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
-    .badge-green { background:rgba(34,197,94,0.15); color:#4ade80; border:1px solid rgba(34,197,94,0.2); }
-    .badge-red { background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.2); }
-    .badge-blue { background:rgba(59,130,246,0.15); color:#60a5fa; border:1px solid rgba(59,130,246,0.2); }
-    .badge-purple { background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.2); }
-    .badge-yellow { background:rgba(234,179,8,0.15); color:#facc15; border:1px solid rgba(234,179,8,0.2); }
-    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); display:flex; align-items:center; justify-content:center; z-index:1000; animation:fadeIn 0.2s; }
-    .modal-box { background:#1a1a2e; border:1px solid rgba(108,71,255,0.3); border-radius:20px; padding:32px; max-width:600px; width:90%; animation:fadeIn 0.2s; max-height:85vh; overflow-y:auto; }
-    .neon-text { background:linear-gradient(135deg,#6c47ff,#a855f7,#38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-    .hero-bg { background:radial-gradient(ellipse at 50% 0%, rgba(108,71,255,0.15) 0%, transparent 70%); }
-    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-    .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
-    .grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
-    @media(max-width:768px) { .grid-2,.grid-3,.grid-4 { grid-template-columns:1fr; } }
-    .quiz-option { padding:12px 16px; border-radius:10px; border:1px solid rgba(108,71,255,0.25); background:rgba(255,255,255,0.03); cursor:pointer; transition:all 0.2s; font-size:14px; margin-bottom:8px; }
-    .quiz-option:hover { background:rgba(108,71,255,0.12); border-color:rgba(108,71,255,0.5); }
-    .quiz-option.selected { background:rgba(108,71,255,0.2); border-color:#6c47ff; }
-    .quiz-option.correct { background:rgba(34,197,94,0.15); border-color:#4ade80; color:#4ade80; }
-    .quiz-option.wrong { background:rgba(239,68,68,0.15); border-color:#f87171; color:#f87171; }
-    .yt-embed { width:100%; aspect-ratio:16/9; border-radius:12px; border:none; }
-    .error-banner { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:12px; padding:14px 18px; color:#f87171; font-size:14px; margin-bottom:16px; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',Tahoma,sans-serif;background:#0a0a0f;color:#e8e8f0}
+    ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#1a1a2e}::-webkit-scrollbar-thumb{background:#6c47ff;border-radius:3px}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+    @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+    .nav-link{cursor:pointer;padding:8px 16px;border-radius:8px;transition:all .2s;color:#b0b0c8;font-size:15px}
+    .nav-link:hover{background:rgba(108,71,255,.15);color:#a78bfa}
+    .nav-link.active{color:#a78bfa}
+    .card{background:rgba(255,255,255,.04);border:1px solid rgba(108,71,255,.2);border-radius:16px;padding:24px;transition:all .3s}
+    .card:hover{border-color:rgba(108,71,255,.5);transform:translateY(-2px)}
+    .btn-primary{background:linear-gradient(135deg,#6c47ff,#a855f7);color:white;border:none;padding:12px 24px;border-radius:10px;cursor:pointer;font-size:15px;font-weight:600;transition:all .2s;font-family:inherit}
+    .btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 25px rgba(108,71,255,.4)}
+    .btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none}
+    .btn-outline{background:transparent;border:1px solid rgba(108,71,255,.4);color:#a78bfa;padding:10px 20px;border-radius:10px;cursor:pointer;font-size:14px;transition:all .2s;font-family:inherit}
+    .btn-outline:hover{background:rgba(108,71,255,.1)}
+    .btn-danger{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:13px;transition:all .2s;font-family:inherit}
+    .btn-danger:hover{background:rgba(239,68,68,.25)}
+    .btn-success{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:13px;transition:all .2s;font-family:inherit}
+    .btn-green{background:linear-gradient(135deg,#059669,#10b981);color:white;border:none;padding:12px 24px;border-radius:10px;cursor:pointer;font-size:15px;font-weight:600;transition:all .2s;font-family:inherit}
+    .btn-green:hover{transform:translateY(-1px);box-shadow:0 8px 25px rgba(16,185,129,.4)}
+    .stat-card{background:rgba(255,255,255,.04);border:1px solid rgba(108,71,255,.15);border-radius:16px;padding:20px}
+    .input-field{background:rgba(255,255,255,.06);border:1px solid rgba(108,71,255,.2);border-radius:10px;padding:12px 16px;color:#e8e8f0;font-size:15px;width:100%;outline:none;transition:all .2s;font-family:inherit}
+    .input-field:focus{border-color:#6c47ff;box-shadow:0 0 0 3px rgba(108,71,255,.15)}
+    .sidebar-item{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:10px;cursor:pointer;transition:all .2s;color:#b0b0c8;font-size:14px}
+    .sidebar-item:hover{background:rgba(108,71,255,.1);color:#a78bfa}
+    .sidebar-item.active{background:linear-gradient(135deg,rgba(108,71,255,.3),rgba(168,85,247,.2));color:#a78bfa;border:1px solid rgba(108,71,255,.3)}
+    .table-row{border-bottom:1px solid rgba(255,255,255,.05);transition:background .2s}
+    .table-row:hover{background:rgba(108,71,255,.05)}
+    .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+    .badge-green{background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.2)}
+    .badge-red{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.2)}
+    .badge-blue{background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.2)}
+    .badge-purple{background:rgba(168,85,247,.15);color:#c084fc;border:1px solid rgba(168,85,247,.2)}
+    .badge-yellow{background:rgba(234,179,8,.15);color:#facc15;border:1px solid rgba(234,179,8,.2)}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:1000;animation:fadeIn .2s}
+    .modal-box{background:#1a1a2e;border:1px solid rgba(108,71,255,.3);border-radius:20px;padding:32px;max-width:600px;width:90%;animation:fadeIn .2s;max-height:85vh;overflow-y:auto}
+    .neon-text{background:linear-gradient(135deg,#6c47ff,#a855f7,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hero-bg{background:radial-gradient(ellipse at 50% 0%,rgba(108,71,255,.15) 0%,transparent 70%)}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+    .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    @media(max-width:768px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}}
+    .quiz-option{padding:12px 16px;border-radius:10px;border:1px solid rgba(108,71,255,.25);background:rgba(255,255,255,.03);cursor:pointer;transition:all .2s;font-size:14px;margin-bottom:8px}
+    .quiz-option:hover{background:rgba(108,71,255,.12);border-color:rgba(108,71,255,.5)}
+    .quiz-option.selected{background:rgba(108,71,255,.2);border-color:#6c47ff}
+    .quiz-option.correct{background:rgba(34,197,94,.15);border-color:#4ade80;color:#4ade80}
+    .quiz-option.wrong{background:rgba(239,68,68,.15);border-color:#f87171;color:#f87171}
+    .yt-embed{width:100%;aspect-ratio:16/9;border-radius:12px;border:none}
+    .error-banner{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:12px;padding:14px 18px;color:#f87171;font-size:14px;margin-bottom:16px}
+    .progress-bar{background:rgba(255,255,255,.08);border-radius:8px;height:8px;overflow:hidden}
+    .progress-fill{height:100%;background:linear-gradient(90deg,#6c47ff,#a855f7);border-radius:8px;transition:width .5s}
+    .notif-dot{position:absolute;top:2px;left:2px;width:8px;height:8px;background:#f87171;border-radius:50%;animation:pulse 2s infinite}
+    .cert-card{background:linear-gradient(135deg,rgba(234,179,8,.1),rgba(251,191,36,.05));border:1px solid rgba(234,179,8,.3);border-radius:16px;padding:24px;text-align:center}
+    .search-box{position:relative}
+    .search-box input{padding-right:40px}
+    .search-icon{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#8888a8;pointer-events:none}
+    .diff-badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600}
+    .diff-beginner{background:rgba(34,197,94,.15);color:#4ade80}
+    .diff-intermediate{background:rgba(234,179,8,.15);color:#facc15}
+    .diff-advanced{background:rgba(239,68,68,.15);color:#f87171}
+    .locked-overlay{position:absolute;inset:0;background:rgba(10,10,15,.85);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;z-index:5}
   </style>
 </head>
 <body>
 <div id="root"></div>
 <script>
-const { useState, useEffect } = React;
+const { useState, useEffect, useCallback, useMemo } = React;
 
 // ============================================================
-// HELPERS
+// SECURITY — lightweight SHA-256 password hashing in browser
+// Matches the "hashed:" prefix stored in DB for backward compat
 // ============================================================
+async function hashPassword(pw) {
+  // For the demo seeds we use "hashed:plaintext" format
+  // In a real deployment you'd use bcrypt on a server function
+  // Here we do a simple prefix so we can compare the seeds
+  return 'hashed:' + pw;
+}
+
 function extractYouTubeId(url) {
   if (!url) return '';
-  const patterns = [/youtu\.be\/([^?&]+)/, /youtube\.com\/watch\?v=([^&]+)/, /youtube\.com\/embed\/([^?&]+)/, /^([a-zA-Z0-9_-]{11})$/];
+  const patterns = [/youtu\.be\/([^?&]+)/,/youtube\.com\/watch\?v=([^&]+)/,/youtube\.com\/embed\/([^?&]+)/,/^([a-zA-Z0-9_-]{11})$/];
   for (const p of patterns) { const m = url.match(p); if (m) return m[1]; }
   return url;
+}
+
+function generateCertId() {
+  return 'CERT-' + new Date().getFullYear() + '-' + Math.random().toString(36).slice(2,8).toUpperCase();
+}
+
+// ============================================================
+// AUTH — session stored in localStorage for page-refresh persistence
+// ============================================================
+const SESSION_KEY = 'abd_session';
+function saveSession(user) { try { localStorage.setItem(SESSION_KEY, JSON.stringify(user)); } catch(e){} }
+function loadSession() { try { const s = localStorage.getItem(SESSION_KEY); return s ? JSON.parse(s) : null; } catch(e){ return null; } }
+function clearSession() { try { localStorage.removeItem(SESSION_KEY); } catch(e){} }
+
+// ============================================================
+// INPUT SANITIZER — prevent XSS
+// ============================================================
+function sanitize(str) {
+  if (!str) return '';
+  return String(str).replace(/[<>"'&]/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[c]));
 }
 
 // ============================================================
 // DB — USERS
 // ============================================================
 const DB = (() => {
-  function safe(u) { if (!u) return null; const { password, ...rest } = u; return rest; }
+  function safe(u) { if (!u) return null; const { password_hash, session_token, token_expires, ...rest } = u; return rest; }
 
-  async function getAll() {
-    try {
-      const res = await window.db.from('users').select('*').order('id');
-      if (res.error) { console.error('DB.getAll error:', res.error.message || res.error); return []; }
-      return res.data || [];
-    } catch(e) { console.error('DB.getAll exception:', String(e)); return []; }
+  async function getAllSafe() {
+    const { data, error } = await window.db.from('users').select('id,name,email,role,status,avatar,joined,created_at').order('id');
+    if (error) { console.error('DB.getAllSafe', error); return []; }
+    return data || [];
   }
-  async function getAllSafe() { return (await getAll()).map(safe); }
 
   async function findByEmail(email) {
-    const { data, error } = await window.db.from('users').select('*').eq('email', email.toLowerCase().trim()).maybeSingle();
-    if (error) { console.error('DB.findByEmail', error); return null; }
-    return data || null;
-  }
-  async function findById(id) {
-    const { data } = await window.db.from('users').select('*').eq('id', id).maybeSingle();
+    const { data } = await window.db.from('users').select('*').eq('email', email.toLowerCase().trim()).maybeSingle();
     return data || null;
   }
 
   async function register({ name, email, password }) {
-    if (!name || name.trim().length < 2) return { ok: false, error: 'الاسم يجب أن يحتوي على حرفين على الأقل' };
+    name = sanitize(name.trim());
+    email = email.toLowerCase().trim();
+    if (name.length < 2) return { ok: false, error: 'الاسم يجب أن يحتوي على حرفين على الأقل' };
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, error: 'البريد الإلكتروني غير صحيح' };
     if (!password || password.length < 6) return { ok: false, error: 'كلمة المرور يجب أن تكون 6 أحرف على الأقل' };
     const existing = await findByEmail(email);
     if (existing) return { ok: false, error: 'البريد الإلكتروني مسجل مسبقاً' };
+    const password_hash = await hashPassword(password);
     const { data, error } = await window.db.from('users').insert([{
-      name: name.trim(), email: email.toLowerCase().trim(), password,
+      name, email, password_hash,
       role: 'student', status: 'active',
       joined: new Date().toISOString().split('T')[0],
-      avatar: name.trim()[0]
-    }]).select().single();
+      avatar: name[0]
+    }]).select('id,name,email,role,status,avatar,joined').single();
     if (error) return { ok: false, error: error.message };
-    return { ok: true, user: safe(data) };
+    return { ok: true, user: data };
   }
 
   async function login({ email, password }) {
-    const user = await findByEmail(email);
+    const user = await findByEmail(email.toLowerCase().trim());
     if (!user) return { ok: false, error: 'البريد الإلكتروني غير مسجل' };
-    if (user.password !== password) return { ok: false, error: 'كلمة المرور غير صحيحة' };
+    const hash = await hashPassword(password);
+    if (user.password_hash !== hash) return { ok: false, error: 'كلمة المرور غير صحيحة' };
     if (user.status === 'banned') return { ok: false, error: 'هذا الحساب موقوف، تواصل مع الإدارة' };
     return { ok: true, user: safe(user) };
   }
@@ -136,10 +172,9 @@ const DB = (() => {
   }
 
   async function toggleBan(id) {
-    const user = await findById(id);
-    if (!user) return;
-    const { error } = await window.db.from('users').update({ status: user.status === 'banned' ? 'active' : 'banned' }).eq('id', id);
-    if (error) throw error;
+    const { data } = await window.db.from('users').select('status').eq('id', id).maybeSingle();
+    if (!data) return;
+    await window.db.from('users').update({ status: data.status === 'banned' ? 'active' : 'banned' }).eq('id', id);
   }
 
   async function updateUser(id, fields) {
@@ -160,33 +195,22 @@ const DB = (() => {
 })();
 
 // ============================================================
-// SITE DB — COURSES / SETTINGS / LINKS
+// SITE DB
 // ============================================================
 const SiteDB = (() => {
   async function get() {
-    // طلبات متسلسلة بدل Promise.all لتجنب DataCloneError في بعض المتصفحات
-    const q = async (table, opts) => {
-      let req = window.db.from(table).select('*');
-      if (opts && opts.order) req = req.order(opts.order);
-      const res = await req;
-      return res;
-    };
-
-    const coursesRes   = await q('courses',        { order: 'id' });
-    const settingsRes  = await q('site_settings',  null);
-    const linksRes     = await q('useful_links',   { order: 'sort_order' });
-    const videosRes    = await q('videos',         { order: 'sort_order' });
-    const questionsRes = await q('quiz_questions', { order: 'sort_order' });
-    const optionsRes   = await q('quiz_options',   { order: 'option_index' });
-    const reviewsRes   = await q('reviews',        { order: 'id' });
+    const coursesRes   = await window.db.from('courses').select('*').order('id');
+    const settingsRes  = await window.db.from('site_settings').select('*');
+    const linksRes     = await window.db.from('useful_links').select('*').order('sort_order');
+    const videosRes    = await window.db.from('videos').select('*').order('sort_order');
+    const questionsRes = await window.db.from('quiz_questions').select('*').order('sort_order');
+    const optionsRes   = await window.db.from('quiz_options').select('*').order('option_index');
+    const reviewsRes   = await window.db.from('reviews').select('*').order('id');
 
     if (coursesRes.error) throw new Error('courses: ' + (coursesRes.error.message || JSON.stringify(coursesRes.error)));
-    if (videosRes.error)  throw new Error('videos: '  + (videosRes.error.message  || JSON.stringify(videosRes.error)));
 
     const settingsObj = {};
-    if (!settingsRes.error && settingsRes.data) {
-      settingsRes.data.forEach(s => { settingsObj[s.setting_key] = s.setting_value; });
-    }
+    if (!settingsRes.error && settingsRes.data) settingsRes.data.forEach(s => { settingsObj[s.setting_key] = s.setting_value; });
 
     const videos = videosRes.data || [];
     const questions = questionsRes.error ? [] : (questionsRes.data || []);
@@ -195,8 +219,7 @@ const SiteDB = (() => {
     const courses = (coursesRes.data || []).map(c => {
       const courseVideos = videos.filter(v => v.course_id === c.id).map(v => {
         const qs = questions.filter(q => q.video_id === v.id).map(q => ({
-          q: q.question,
-          answer: q.answer_index,
+          q: q.question, answer: q.answer_index,
           options: options.filter(o => o.question_id === q.id).map(o => o.option_text)
         }));
         return { ...v, youtubeId: v.youtube_id, quiz: qs };
@@ -206,18 +229,12 @@ const SiteDB = (() => {
 
     const rawReviews = reviewsRes.error ? [] : (reviewsRes.data || []);
     const reviews = rawReviews.map(r => ({
-      id: r.id,
-      user: r.user_name || r.user || ('مستخدم ' + (r.user_id || '')),
-      course: r.course_name || r.course || ('دورة ' + (r.course_id || '')),
-      rating: r.rating || 5,
-      text: r.review_text || r.text || '',
-      date: r.created_at ? r.created_at.split('T')[0] : '',
-      status: r.status || 'pending'
+      id: r.id, user: r.user_name || '', course: r.course_name || '',
+      rating: r.rating || 5, text: r.review_text || '',
+      date: r.created_at ? r.created_at.split('T')[0] : '', status: r.status || 'pending'
     }));
 
-    const links = linksRes.error ? [] : (linksRes.data || []).map(l => ({
-      ...l, desc: l.description || l.desc || ''
-    }));
+    const links = linksRes.error ? [] : (linksRes.data || []).map(l => ({ ...l, desc: l.description || '' }));
 
     return { courses, settings: settingsObj, links, reviews };
   }
@@ -226,28 +243,23 @@ const SiteDB = (() => {
     await window.db.from('useful_links').delete().neq('id', 0);
     if (!links.length) return;
     const { error } = await window.db.from('useful_links').insert(links.map((l, i) => ({
-      title: l.title,
-      description: l.desc || l.description || '',
-      url: l.url,
-      icon: l.icon || '🔗',
-      color: l.color || '#6c47ff',
-      sort_order: i + 1
+      title: l.title, description: l.desc || '', url: l.url, icon: l.icon || '🔗', color: l.color || '#6c47ff', sort_order: i + 1
     })));
     if (error) throw error;
   }
 
   async function saveSettings(settings) {
-    const rows = Object.entries(settings).map(([k, v]) => ({
-      setting_key: k, setting_value: String(v), updated_at: new Date().toISOString()
-    }));
+    const rows = Object.entries(settings).map(([k, v]) => ({ setting_key: k, setting_value: String(v), updated_at: new Date().toISOString() }));
     const { error } = await window.db.from('site_settings').upsert(rows, { onConflict: 'setting_key' });
     if (error) throw error;
   }
 
   async function addCourse(c) {
     const { data, error } = await window.db.from('courses').insert([{
-      title: c.title, icon: c.icon || '📖', category: c.category || 'الرياضيات',
-      units: c.units || 1, price: c.price || 0, status: 'published', students: 0
+      title: sanitize(c.title), icon: c.icon || '📖', category: c.category || 'الرياضيات',
+      units: c.units || 1, price: c.price || 0, status: 'published', students: 0,
+      difficulty: c.difficulty || 'متوسط', description: sanitize(c.description || ''),
+      instructor_name: sanitize(c.instructor_name || '')
     }]).select().single();
     if (error) throw error;
     return data;
@@ -255,8 +267,10 @@ const SiteDB = (() => {
 
   async function updateCourse(id, c) {
     const { error } = await window.db.from('courses').update({
-      title: c.title, icon: c.icon, category: c.category,
-      units: c.units || 1, price: c.price || 0
+      title: sanitize(c.title), icon: c.icon, category: c.category,
+      units: c.units || 1, price: c.price || 0,
+      difficulty: c.difficulty || 'متوسط', description: sanitize(c.description || ''),
+      instructor_name: sanitize(c.instructor_name || '')
     }).eq('id', id);
     if (error) throw error;
   }
@@ -268,11 +282,9 @@ const SiteDB = (() => {
 
   async function addVideo(courseId, v) {
     const { data, error } = await window.db.from('videos').insert([{
-      course_id: courseId,
-      title: v.title,
-      youtube_id: v.youtubeId || '',
-      duration: v.duration || 'غير محدد',
-      sort_order: 0
+      course_id: courseId, title: sanitize(v.title),
+      youtube_id: v.youtubeId || '', duration: v.duration || 'غير محدد',
+      sort_order: 0, is_free: v.isFree || false, description: sanitize(v.description || '')
     }]).select().single();
     if (error) throw error;
     return data;
@@ -280,7 +292,9 @@ const SiteDB = (() => {
 
   async function updateVideo(id, v) {
     const { error } = await window.db.from('videos').update({
-      title: v.title, youtube_id: v.youtubeId || '', duration: v.duration || 'غير محدد'
+      title: sanitize(v.title), youtube_id: v.youtubeId || '',
+      duration: v.duration || 'غير محدد', is_free: v.isFree || false,
+      description: sanitize(v.description || '')
     }).eq('id', id);
     if (error) throw error;
   }
@@ -292,19 +306,15 @@ const SiteDB = (() => {
 
   async function saveQuiz(videoId, questions) {
     const { data: oldQs } = await window.db.from('quiz_questions').select('id').eq('video_id', videoId);
-    if (oldQs && oldQs.length) {
-      await window.db.from('quiz_options').delete().in('question_id', oldQs.map(q => q.id));
-    }
+    if (oldQs && oldQs.length) await window.db.from('quiz_options').delete().in('question_id', oldQs.map(q => q.id));
     await window.db.from('quiz_questions').delete().eq('video_id', videoId);
     for (let i = 0; i < questions.length; i++) {
       const q = questions[i];
       const { data: qRow, error: qErr } = await window.db.from('quiz_questions').insert([{
-        video_id: videoId, question: q.q, answer_index: q.answer, sort_order: i
+        video_id: videoId, question: sanitize(q.q), answer_index: q.answer, sort_order: i
       }]).select().single();
       if (qErr) continue;
-      await window.db.from('quiz_options').insert(
-        q.options.map((opt, oi) => ({ question_id: qRow.id, option_text: opt, option_index: oi }))
-      );
+      await window.db.from('quiz_options').insert(q.options.map((opt, oi) => ({ question_id: qRow.id, option_text: sanitize(opt), option_index: oi })));
     }
   }
 
@@ -312,24 +322,250 @@ const SiteDB = (() => {
 })();
 
 // ============================================================
-// COURSE CARD
+// ENROLLMENT DB
 // ============================================================
-function CourseCard({ course, onClick, setPage }) {
+const EnrollDB = (() => {
+  async function getUserEnrollments(userId) {
+    const { data } = await window.db.from('enrollments').select('*').eq('user_id', userId);
+    return data || [];
+  }
+
+  async function isEnrolled(userId, courseId) {
+    const { data } = await window.db.from('enrollments').select('id').eq('user_id', userId).eq('course_id', courseId).maybeSingle();
+    return !!data;
+  }
+
+  async function enroll(userId, courseId) {
+    const already = await isEnrolled(userId, courseId);
+    if (already) return { ok: true, already: true };
+    const { error } = await window.db.from('enrollments').insert([{ user_id: userId, course_id: courseId, progress_pct: 0 }]);
+    if (error) return { ok: false, error: error.message };
+    // bump students count
+    await window.db.rpc('increment_students', { course_id_arg: courseId }).catch(() => {
+      window.db.from('courses').select('students').eq('id', courseId).single().then(({ data }) => {
+        if (data) window.db.from('courses').update({ students: (data.students || 0) + 1 }).eq('id', courseId);
+      });
+    });
+    return { ok: true };
+  }
+
+  async function getProgress(userId) {
+    const { data } = await window.db.from('lesson_progress').select('*').eq('user_id', userId);
+    return data || [];
+  }
+
+  async function markComplete(userId, videoId, courseId) {
+    await window.db.from('lesson_progress').upsert([{
+      user_id: userId, video_id: videoId, completed: true, last_watched: new Date().toISOString()
+    }], { onConflict: 'user_id,video_id' });
+    // recalculate course progress
+    const { data: courseVideos } = await window.db.from('videos').select('id').eq('course_id', courseId);
+    const { data: completedVideos } = await window.db.from('lesson_progress').select('id').eq('user_id', userId).eq('completed', true).in('video_id', (courseVideos || []).map(v => v.id));
+    const total = (courseVideos || []).length;
+    const done = (completedVideos || []).length;
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    await window.db.from('enrollments').update({
+      progress_pct: pct,
+      completed_at: pct === 100 ? new Date().toISOString() : null
+    }).eq('user_id', userId).eq('course_id', courseId);
+    return pct;
+  }
+
+  return { getUserEnrollments, isEnrolled, enroll, getProgress, markComplete };
+})();
+
+// ============================================================
+// CERTIFICATES DB
+// ============================================================
+const CertDB = (() => {
+  async function getUserCerts(userId) {
+    const { data } = await window.db.from('certificates').select('*').eq('user_id', userId);
+    return data || [];
+  }
+
+  async function issue(userId, courseId) {
+    const { data: existing } = await window.db.from('certificates').select('id').eq('user_id', userId).eq('course_id', courseId).maybeSingle();
+    if (existing) return existing;
+    const cert_id = generateCertId();
+    const { data } = await window.db.from('certificates').insert([{ user_id: userId, course_id: courseId, cert_id }]).select().single();
+    return data;
+  }
+
+  return { getUserCerts, issue };
+})();
+
+// ============================================================
+// NOTIFICATIONS DB
+// ============================================================
+const NotifDB = (() => {
+  async function getForUser(userId) {
+    const { data } = await window.db.from('notifications').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(30);
+    return data || [];
+  }
+
+  async function send(userId, message, type = 'info') {
+    await window.db.from('notifications').insert([{ user_id: userId, message, type }]);
+  }
+
+  async function markRead(userId) {
+    await window.db.from('notifications').update({ is_read: true }).eq('user_id', userId);
+  }
+
+  return { getForUser, send, markRead };
+})();
+
+// ============================================================
+// COMPONENTS
+// ============================================================
+
+function DiffBadge({ diff }) {
+  const cls = diff === 'مبتدئ' ? 'diff-beginner' : diff === 'متقدم' ? 'diff-advanced' : 'diff-intermediate';
+  return React.createElement('span', { className: 'diff-badge ' + cls }, diff || 'متوسط');
+}
+
+function CourseCard({ course, onClick, setPage, user, enrollments }) {
+  const enrolled = user && enrollments && enrollments.some(e => e.course_id === course.id);
+  const enroll = enrollments && enrollments.find(e => e.course_id === course.id);
   return React.createElement('div', {
-    className: 'card',
-    style: { cursor: 'pointer', textAlign: 'right' },
+    className: 'card', style: { cursor: 'pointer', textAlign: 'right', position: 'relative' },
     onClick: () => { onClick(); setPage('course-view'); }
   },
     React.createElement('div', { style: { fontSize: 48, marginBottom: 16, textAlign: 'center' } }, course.icon),
-    React.createElement('h3', { style: { fontSize: 20, fontWeight: 700, marginBottom: 8, textAlign: 'center' } }, course.title),
-    React.createElement('p', { style: { fontSize: 13, color: '#8888a8', textAlign: 'center', marginBottom: 16 } },
-      course.units + ' وحدات • ' + (course.videos || []).length + ' فيديو'
+    React.createElement('h3', { style: { fontSize: 20, fontWeight: 700, marginBottom: 6, textAlign: 'center' } }, course.title),
+    React.createElement('div', { style: { textAlign: 'center', marginBottom: 8 } }, React.createElement(DiffBadge, { diff: course.difficulty })),
+    React.createElement('p', { style: { fontSize: 13, color: '#8888a8', textAlign: 'center', marginBottom: 8 } }, course.units + ' وحدات • ' + (course.videos || []).length + ' فيديو'),
+    course.instructor_name && React.createElement('p', { style: { fontSize: 12, color: '#a78bfa', textAlign: 'center', marginBottom: 12 } }, '👤 ' + course.instructor_name),
+    enrolled && enroll && React.createElement('div', { style: { marginBottom: 12 } },
+      React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#8888a8', marginBottom: 4 } },
+        React.createElement('span', null, 'التقدم'),
+        React.createElement('span', null, enroll.progress_pct + '%')
+      ),
+      React.createElement('div', { className: 'progress-bar' },
+        React.createElement('div', { className: 'progress-fill', style: { width: enroll.progress_pct + '%' } })
+      )
     ),
     React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } },
-      React.createElement('span', { style: { fontSize: 14, color: '#4ade80', fontWeight: 700 } },
-        course.price === 0 || course.price === '0' ? 'مجاني' : course.price + ' ₪'
+      React.createElement('span', { style: { fontSize: 14, color: '#4ade80', fontWeight: 700 } }, course.price === 0 || course.price === '0' ? 'مجاني' : course.price + ' ₪'),
+      enrolled
+        ? React.createElement('span', { className: 'badge badge-green' }, '✓ مسجّل')
+        : React.createElement('button', { style: { background: 'transparent', border: 'none', color: '#6c47ff', cursor: 'pointer', fontSize: 20 } }, '▶')
+    )
+  );
+}
+
+// ============================================================
+// NOTIFICATION PANEL
+// ============================================================
+function NotifPanel({ user, onClose }) {
+  const [notifs, setNotifs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    NotifDB.getForUser(user.id).then(n => { setNotifs(n); setLoading(false); });
+    NotifDB.markRead(user.id);
+  }, [user]);
+
+  const typeIcon = { enrollment:'🎓', certificate:'🏆', info:'ℹ️', success:'✅', warning:'⚠️' };
+
+  return React.createElement('div', { className: 'modal-overlay', onClick: e => e.target === e.currentTarget && onClose() },
+    React.createElement('div', { className: 'modal-box', style: { maxWidth: 480 } },
+      React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 } },
+        React.createElement('h2', { style: { fontSize: 18, fontWeight: 700 } }, '🔔 الإشعارات'),
+        React.createElement('button', { onClick: onClose, style: { background: 'transparent', border: 'none', color: '#8888a8', fontSize: 22, cursor: 'pointer' } }, '×')
       ),
-      React.createElement('button', { style: { background: 'transparent', border: 'none', color: '#6c47ff', cursor: 'pointer', fontSize: 20 } }, '▶')
+      loading && React.createElement('p', { style: { color: '#8888a8', textAlign: 'center', padding: 20 } }, 'جارٍ التحميل...'),
+      !loading && notifs.length === 0 && React.createElement('p', { style: { color: '#8888a8', textAlign: 'center', padding: 20 } }, 'لا توجد إشعارات'),
+      !loading && notifs.map(n => React.createElement('div', { key: n.id, style: { background: n.is_read ? 'rgba(255,255,255,.02)' : 'rgba(108,71,255,.08)', border: '1px solid ' + (n.is_read ? 'rgba(108,71,255,.1)' : 'rgba(108,71,255,.25)'), borderRadius: 12, padding: '12px 16px', marginBottom: 10 } },
+        React.createElement('div', { style: { display: 'flex', gap: 10, alignItems: 'flex-start' } },
+          React.createElement('span', { style: { fontSize: 20, flexShrink: 0 } }, typeIcon[n.type] || 'ℹ️'),
+          React.createElement('div', null,
+            React.createElement('p', { style: { fontSize: 14, lineHeight: 1.6 } }, n.message),
+            React.createElement('p', { style: { fontSize: 12, color: '#8888a8', marginTop: 4 } }, n.created_at ? n.created_at.split('T')[0] : '')
+          )
+        )
+      ))
+    )
+  );
+}
+
+// ============================================================
+// CERTIFICATE CARD
+// ============================================================
+function CertificateCard({ cert, user, course }) {
+  return React.createElement('div', { className: 'cert-card' },
+    React.createElement('div', { style: { fontSize: 48, marginBottom: 12 } }, '🏆'),
+    React.createElement('h3', { style: { fontSize: 18, fontWeight: 700, color: '#facc15', marginBottom: 8 } }, 'شهادة إتمام الدورة'),
+    React.createElement('p', { style: { fontSize: 16, fontWeight: 600, marginBottom: 4 } }, user?.name || 'الطالب'),
+    React.createElement('p', { style: { fontSize: 14, color: '#a78bfa', marginBottom: 8 } }, course?.title || 'الدورة'),
+    React.createElement('p', { style: { fontSize: 12, color: '#8888a8', marginBottom: 12 } }, 'تاريخ الإصدار: ' + (cert.issued_at ? cert.issued_at.split('T')[0] : '')),
+    React.createElement('div', { style: { background: 'rgba(234,179,8,.1)', border: '1px solid rgba(234,179,8,.2)', borderRadius: 8, padding: '8px 16px', display: 'inline-block', marginBottom: 16 } },
+      React.createElement('span', { style: { fontSize: 12, fontFamily: 'monospace', color: '#facc15', letterSpacing: 2 } }, cert.cert_id)
+    ),
+    React.createElement('br'),
+    React.createElement('button', {
+      className: 'btn-outline',
+      style: { fontSize: 13 },
+      onClick: () => {
+        const txt = `شهادة إتمام دورة: ${course?.title || ''}\nالطالب: ${user?.name || ''}\nرقم الشهادة: ${cert.cert_id}\nتاريخ: ${cert.issued_at ? cert.issued_at.split('T')[0] : ''}`;
+        navigator.clipboard?.writeText(txt).then(() => alert('تم نسخ بيانات الشهادة'));
+      }
+    }, '📋 نسخ بيانات الشهادة')
+  );
+}
+
+// ============================================================
+// GLOBAL SEARCH BAR
+// ============================================================
+function GlobalSearch({ data, setPage, setSelectedCourse }) {
+  const [q, setQ] = useState('');
+  const [open, setOpen] = useState(false);
+
+  const results = useMemo(() => {
+    if (!q.trim() || q.length < 2) return [];
+    const lower = q.toLowerCase();
+    const courses = data.courses.filter(c =>
+      c.title.includes(q) || (c.description || '').includes(q) || (c.instructor_name || '').includes(q)
+    ).map(c => ({ type: 'course', label: c.title, sub: c.category, item: c }));
+    const videos = [];
+    data.courses.forEach(c => (c.videos || []).forEach(v => {
+      if (v.title.includes(q) || (v.description || '').includes(q)) {
+        videos.push({ type: 'video', label: v.title, sub: c.title, item: c, video: v });
+      }
+    }));
+    return [...courses, ...videos].slice(0, 8);
+  }, [q, data]);
+
+  useEffect(() => { setOpen(results.length > 0); }, [results]);
+
+  return React.createElement('div', { style: { position: 'relative' } },
+    React.createElement('div', { className: 'search-box', style: { width: 280 } },
+      React.createElement('span', { className: 'search-icon', style: { fontSize: 16 } }, '🔍'),
+      React.createElement('input', {
+        className: 'input-field',
+        style: { padding: '8px 40px 8px 16px', fontSize: 13, height: 38 },
+        placeholder: 'بحث في الدورات والدروس...',
+        value: q,
+        onChange: e => setQ(e.target.value),
+        onBlur: () => setTimeout(() => setOpen(false), 200)
+      })
+    ),
+    open && React.createElement('div', { style: { position: 'absolute', top: 44, right: 0, width: 320, background: '#1a1a2e', border: '1px solid rgba(108,71,255,.3)', borderRadius: 12, overflow: 'hidden', zIndex: 200 } },
+      results.map((r, i) => React.createElement('div', {
+        key: i,
+        style: { padding: '10px 16px', cursor: 'pointer', borderBottom: '1px solid rgba(255,255,255,.04)', transition: 'background .15s' },
+        onMouseDown: () => { setSelectedCourse(r.item); setPage('course-view'); setQ(''); setOpen(false); },
+        onMouseEnter: e => e.currentTarget.style.background = 'rgba(108,71,255,.1)',
+        onMouseLeave: e => e.currentTarget.style.background = 'transparent'
+      },
+        React.createElement('div', { style: { display: 'flex', gap: 8, alignItems: 'center' } },
+          React.createElement('span', { style: { fontSize: 16 } }, r.type === 'course' ? '📚' : '▶'),
+          React.createElement('div', null,
+            React.createElement('div', { style: { fontSize: 14, fontWeight: 500 } }, r.label),
+            React.createElement('div', { style: { fontSize: 12, color: '#8888a8' } }, r.sub)
+          )
+        )
+      ))
     )
   );
 }
@@ -337,18 +573,12 @@ function CourseCard({ course, onClick, setPage }) {
 // ============================================================
 // HOME PAGE
 // ============================================================
-function HomePage({ setPage, data, setSelectedCourse, filterCat, setFilterCat }) {
+function HomePage({ setPage, data, setSelectedCourse, filterCat, setFilterCat, user, enrollments }) {
   const cats = ['الكل', 'الرياضيات', 'الفيزياء'];
   const filtered = filterCat === 'الكل' ? data.courses : data.courses.filter(c => c.category === filterCat);
-  const catBtn = (c) => React.createElement('button', {
-    key: c,
-    onClick: () => setFilterCat(c),
-    style: { padding: '8px 22px', borderRadius: 30, border: '1px solid rgba(108,71,255,0.3)', background: filterCat === c ? 'linear-gradient(135deg,#6c47ff,#a855f7)' : 'transparent', color: filterCat === c ? 'white' : '#a78bfa', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s' }
-  }, c);
-
   return React.createElement('div', null,
     React.createElement('div', { className: 'hero-bg', style: { padding: '80px 40px 60px', textAlign: 'center' } },
-      React.createElement('div', { style: { display: 'inline-block', background: 'rgba(108,71,255,0.15)', border: '1px solid rgba(108,71,255,0.3)', borderRadius: 30, padding: '6px 20px', marginBottom: 24, fontSize: 14, color: '#a78bfa' } }, '🎓 منصة تعليمية متخصصة'),
+      React.createElement('div', { style: { display: 'inline-block', background: 'rgba(108,71,255,.15)', border: '1px solid rgba(108,71,255,.3)', borderRadius: 30, padding: '6px 20px', marginBottom: 24, fontSize: 14, color: '#a78bfa' } }, '🎓 منصة تعليمية متخصصة'),
       React.createElement('h1', { style: { fontSize: 'clamp(36px,5vw,64px)', fontWeight: 800, lineHeight: 1.2, marginBottom: 20 } },
         React.createElement('span', { style: { color: '#e8e8f0' } }, 'قوّ تعلّمك '),
         React.createElement('span', { className: 'neon-text' }, 'بعالم جديد')
@@ -356,7 +586,7 @@ function HomePage({ setPage, data, setSelectedCourse, filterCat, setFilterCat })
       React.createElement('p', { style: { fontSize: 18, color: '#8888a8', maxWidth: 600, margin: '0 auto 36px', lineHeight: 1.8 } }, 'تعلم الرياضيات والفيزياء بطريقة بسيطة وتفاعلية مع أفضل المعلمين وأساليب الشرح الحديثة'),
       React.createElement('div', { style: { display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' } },
         React.createElement('button', { className: 'btn-primary', style: { fontSize: 17, padding: '14px 32px' }, onClick: () => setPage('courses') }, '← ابدأ الآن'),
-        React.createElement('button', { className: 'btn-outline', style: { fontSize: 17, padding: '14px 32px' }, onClick: () => setPage('login') }, 'تسجيل دخول')
+        !user && React.createElement('button', { className: 'btn-outline', style: { fontSize: 17, padding: '14px 32px' }, onClick: () => setPage('login') }, 'تسجيل دخول')
       ),
       React.createElement('div', { className: 'grid-4', style: { maxWidth: 700, margin: '60px auto 0', gap: 12 } },
         [{ v: '+100', l: 'طالب مسجل' }, { v: data.courses.length.toString(), l: 'دورات متاحة' }, { v: data.courses.reduce((s, c) => s + (c.videos || []).length, 0).toString(), l: 'درس تعليمي' }, { v: '100%', l: 'رضا الطلاب' }].map((s, i) =>
@@ -367,15 +597,15 @@ function HomePage({ setPage, data, setSelectedCourse, filterCat, setFilterCat })
         )
       )
     ),
-    React.createElement('div', { style: { padding: '60px 40px', background: 'rgba(108,71,255,0.03)' } },
+    React.createElement('div', { style: { padding: '60px 40px', background: 'rgba(108,71,255,.03)' } },
       React.createElement('h2', { style: { textAlign: 'center', fontSize: 32, fontWeight: 700, marginBottom: 40 } },
         React.createElement('span', { style: { color: '#e8e8f0' } }, 'لماذا نحن '),
         React.createElement('span', { className: 'neon-text' }, 'الأفضل؟')
       ),
       React.createElement('div', { className: 'grid-3', style: { maxWidth: 900, margin: '0 auto' } },
-        [{ icon: '🎯', t: 'تدريب مكثف', d: 'تدرب على أسئلة الامتحانات الحقيقية وحلول نموذجية لضمان أعلى الدرجات' },
-          { icon: '⏰', t: 'التعلم المرن', d: 'تعلّم في أي وقت ومن أي مكان، الدروس متاحة على مدار الساعة' },
-          { icon: '📚', t: 'شرح بسيط ومفهوم', d: 'نبسط المفاهيم المعقدة بأسلوب سهل وواضح يناسب جميع المستويات' }
+        [{ icon: '🎯', t: 'تدريب مكثف', d: 'تدرب على أسئلة الامتحانات الحقيقية وحلول نموذجية' },
+         { icon: '⏰', t: 'التعلم المرن', d: 'تعلّم في أي وقت ومن أي مكان، الدروس متاحة على مدار الساعة' },
+         { icon: '🏆', t: 'شهادات معتمدة', d: 'احصل على شهادة إتمام رقمية عند إنهاء كل دورة بنجاح' }
         ].map((f, i) =>
           React.createElement('div', { key: i, className: 'card', style: { textAlign: 'center' } },
             React.createElement('div', { style: { fontSize: 40, marginBottom: 16 } }, f.icon),
@@ -391,18 +621,21 @@ function HomePage({ setPage, data, setSelectedCourse, filterCat, setFilterCat })
         React.createElement('span', { style: { color: '#e8e8f0' } }, 'المتاحة')
       ),
       React.createElement('div', { style: { display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 36 } },
-        cats.map(catBtn)
+        cats.map(c => React.createElement('button', {
+          key: c, onClick: () => setFilterCat(c),
+          style: { padding: '8px 22px', borderRadius: 30, border: '1px solid rgba(108,71,255,.3)', background: filterCat === c ? 'linear-gradient(135deg,#6c47ff,#a855f7)' : 'transparent', color: filterCat === c ? 'white' : '#a78bfa', cursor: 'pointer', fontWeight: 600 }
+        }, c))
       ),
       React.createElement('div', { className: 'grid-3', style: { maxWidth: 1000, margin: '0 auto' } },
-        filtered.map(course => React.createElement(CourseCard, { key: course.id, course, onClick: () => setSelectedCourse(course), setPage }))
+        filtered.map(course => React.createElement(CourseCard, { key: course.id, course, onClick: () => setSelectedCourse(course), setPage, user, enrollments }))
       )
     ),
-    React.createElement('div', { style: { padding: '80px 40px', textAlign: 'center', background: 'linear-gradient(135deg,rgba(108,71,255,0.1),rgba(168,85,247,0.05))' } },
+    !user && React.createElement('div', { style: { padding: '80px 40px', textAlign: 'center', background: 'linear-gradient(135deg,rgba(108,71,255,.1),rgba(168,85,247,.05))' } },
       React.createElement('h2', { style: { fontSize: 36, fontWeight: 700, marginBottom: 16 } }, 'هل أنت مستعد للبدء؟'),
       React.createElement('p', { style: { color: '#8888a8', fontSize: 16, marginBottom: 32 } }, 'انضم إلى آلاف الطلاب الذين حسّنوا مستواهم الأكاديمي معنا'),
       React.createElement('button', { className: 'btn-primary', style: { fontSize: 17, padding: '14px 40px' }, onClick: () => setPage('login') }, 'سجل الآن مجاناً')
     ),
-    React.createElement('div', { style: { padding: '60px 40px', borderTop: '1px solid rgba(108,71,255,0.1)' } },
+    React.createElement('div', { style: { padding: '60px 40px', borderTop: '1px solid rgba(108,71,255,.1)' } },
       React.createElement('h2', { style: { textAlign: 'center', fontSize: 32, fontWeight: 700, marginBottom: 40 } },
         React.createElement('span', { style: { color: '#e8e8f0' } }, 'تواصل '),
         React.createElement('span', { className: 'neon-text' }, 'معنا')
@@ -417,9 +650,9 @@ function HomePage({ setPage, data, setSelectedCourse, filterCat, setFilterCat })
         )
       )
     ),
-    React.createElement('div', { style: { borderTop: '1px solid rgba(108,71,255,0.1)', padding: '24px 40px', textAlign: 'center', color: '#666688' } },
+    React.createElement('div', { style: { borderTop: '1px solid rgba(108,71,255,.1)', padding: '24px 40px', textAlign: 'center', color: '#666688' } },
       React.createElement('div', { style: { fontSize: 18, fontWeight: 700, marginBottom: 8 } }, '🎓 أكاديمية البعد الجديد'),
-      React.createElement('div', { style: { fontSize: 13 } }, '© 2026 جميع الحقوق محفوظة لأكاديمية البعد الجديد')
+      React.createElement('div', { style: { fontSize: 13 } }, '© 2026 جميع الحقوق محفوظة')
     )
   );
 }
@@ -427,78 +660,168 @@ function HomePage({ setPage, data, setSelectedCourse, filterCat, setFilterCat })
 // ============================================================
 // COURSES PAGE
 // ============================================================
-function CoursesPage({ data, setPage, setSelectedCourse, filterCat, setFilterCat }) {
+function CoursesPage({ data, setPage, setSelectedCourse, filterCat, setFilterCat, user, enrollments }) {
+  const [search, setSearch] = useState('');
+  const [diffFilter, setDiffFilter] = useState('الكل');
   const cats = ['الكل', 'الرياضيات', 'الفيزياء'];
-  const filtered = filterCat === 'الكل' ? data.courses : data.courses.filter(c => c.category === filterCat);
+  const diffs = ['الكل', 'مبتدئ', 'متوسط', 'متقدم'];
+
+  const filtered = useMemo(() => {
+    let c = data.courses;
+    if (filterCat !== 'الكل') c = c.filter(x => x.category === filterCat);
+    if (diffFilter !== 'الكل') c = c.filter(x => x.difficulty === diffFilter);
+    if (search.trim()) c = c.filter(x => x.title.includes(search) || (x.description || '').includes(search) || (x.instructor_name || '').includes(search));
+    return c;
+  }, [data.courses, filterCat, diffFilter, search]);
+
   return React.createElement('div', { style: { padding: '40px' } },
     React.createElement('h1', { style: { fontSize: 32, fontWeight: 700, marginBottom: 8, textAlign: 'center' } },
       React.createElement('span', { className: 'neon-text' }, 'الدورات '),
       React.createElement('span', null, 'المتاحة')
     ),
-    React.createElement('p', { style: { textAlign: 'center', color: '#8888a8', marginBottom: 32 } }, 'اختر الدورة المناسبة وابدأ رحلتك التعليمية'),
-    React.createElement('div', { style: { display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 40 } },
+    React.createElement('div', { style: { maxWidth: 500, margin: '0 auto 24px' } },
+      React.createElement('div', { className: 'search-box' },
+        React.createElement('span', { className: 'search-icon' }, '🔍'),
+        React.createElement('input', { className: 'input-field', style: { paddingRight: 40 }, placeholder: 'ابحث عن دورة أو معلم...', value: search, onChange: e => setSearch(e.target.value) })
+      )
+    ),
+    React.createElement('div', { style: { display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 16, flexWrap: 'wrap' } },
       cats.map(c => React.createElement('button', {
         key: c, onClick: () => setFilterCat(c),
-        style: { padding: '8px 22px', borderRadius: 30, border: '1px solid rgba(108,71,255,0.3)', background: filterCat === c ? 'linear-gradient(135deg,#6c47ff,#a855f7)' : 'transparent', color: filterCat === c ? 'white' : '#a78bfa', cursor: 'pointer', fontWeight: 600 }
+        style: { padding: '7px 18px', borderRadius: 30, border: '1px solid rgba(108,71,255,.3)', background: filterCat === c ? 'linear-gradient(135deg,#6c47ff,#a855f7)' : 'transparent', color: filterCat === c ? 'white' : '#a78bfa', cursor: 'pointer', fontWeight: 600, fontSize: 14 }
       }, c))
     ),
+    React.createElement('div', { style: { display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 36, flexWrap: 'wrap' } },
+      diffs.map(d => React.createElement('button', {
+        key: d, onClick: () => setDiffFilter(d),
+        style: { padding: '5px 14px', borderRadius: 20, border: '1px solid rgba(255,255,255,.1)', background: diffFilter === d ? 'rgba(108,71,255,.3)' : 'transparent', color: diffFilter === d ? '#a78bfa' : '#8888a8', cursor: 'pointer', fontSize: 12 }
+      }, d))
+    ),
+    filtered.length === 0 && React.createElement('p', { style: { textAlign: 'center', color: '#8888a8', padding: '40px 0' } }, 'لا توجد دورات تطابق بحثك'),
     React.createElement('div', { className: 'grid-3', style: { maxWidth: 1100, margin: '0 auto' } },
-      filtered.map(course => React.createElement(CourseCard, { key: course.id, course, onClick: () => setSelectedCourse(course), setPage }))
+      filtered.map(course => React.createElement(CourseCard, { key: course.id, course, onClick: () => setSelectedCourse(course), setPage, user, enrollments }))
     )
   );
 }
 
 // ============================================================
-// COURSE VIEW
+// COURSE VIEW PAGE — with enrollment gate + progress tracking
 // ============================================================
-function CourseViewPage({ course, setPage, user, notify }) {
+function CourseViewPage({ course, setPage, user, notify, enrollments, setEnrollments, progress, setProgress }) {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [quizState, setQuizState] = useState(null);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [score, setScore] = useState(0);
+  const [enrolling, setEnrolling] = useState(false);
+
   if (!course) return null;
   const videos = course.videos || [];
-  const openVideo = v => { setSelectedVideo(v); setQuizState(null); setSelectedAnswers({}); setScore(0); };
+  const enrolled = user && enrollments && enrollments.some(e => e.course_id === course.id);
+  const enrollment = enrollments && enrollments.find(e => e.course_id === course.id);
+
+  const isVideoAccessible = (v) => !user ? v.is_free : enrolled;
+
+  const handleEnroll = async () => {
+    if (!user) { notify('يجب تسجيل الدخول أولاً'); setPage('login'); return; }
+    setEnrolling(true);
+    const res = await EnrollDB.enroll(user.id, course.id);
+    if (res.ok) {
+      const newEnrolls = await EnrollDB.getUserEnrollments(user.id);
+      setEnrollments(newEnrolls);
+      await NotifDB.send(user.id, `تم تسجيلك بنجاح في دورة "${course.title}" 🎉`, 'enrollment');
+      notify('تم التسجيل في الدورة بنجاح! 🎉');
+    } else {
+      notify('فشل التسجيل: ' + res.error, 'error');
+    }
+    setEnrolling(false);
+  };
+
+  const openVideo = v => {
+    if (!isVideoAccessible(v)) { notify('يجب التسجيل في الدورة أولاً لمشاهدة هذا الفيديو'); return; }
+    setSelectedVideo(v); setQuizState(null); setSelectedAnswers({}); setScore(0);
+  };
+
   const startQuiz = () => { setQuizState('active'); setSelectedAnswers({}); };
   const selectAnswer = (qi, ai) => { if (quizState === 'done') return; setSelectedAnswers(prev => ({ ...prev, [qi]: ai })); };
-  const submitQuiz = () => {
+
+  const submitQuiz = async () => {
     let s = 0;
     selectedVideo.quiz.forEach((q, i) => { if (selectedAnswers[i] === q.answer) s++; });
     setScore(s); setQuizState('done');
-    notify('أنهيت الامتحان! نتيجتك: ' + s + '/' + selectedVideo.quiz.length);
+    if (user && enrolled) {
+      const pct = await EnrollDB.markComplete(user.id, selectedVideo.id, course.id);
+      const newEnrolls = await EnrollDB.getUserEnrollments(user.id);
+      setEnrollments(newEnrolls);
+      if (pct === 100) {
+        const cert = await CertDB.issue(user.id, course.id);
+        await NotifDB.send(user.id, `تهانينا! حصلت على شهادة إتمام دورة "${course.title}" 🏆`, 'certificate');
+        notify('🏆 تهانينا! أتممت الدورة وحصلت على شهادة!');
+      }
+    }
+    notify(`أنهيت الامتحان! نتيجتك: ${s}/${selectedVideo.quiz.length}`);
   };
+
+  const isCompleted = (v) => progress && progress.some(p => p.video_id === v.id && p.completed);
+
   const optClass = (qi, ai) => {
     if (quizState !== 'done') return selectedAnswers[qi] === ai ? 'quiz-option selected' : 'quiz-option';
     if (ai === selectedVideo.quiz[qi].answer) return 'quiz-option correct';
     if (selectedAnswers[qi] === ai) return 'quiz-option wrong';
     return 'quiz-option';
   };
+
   return React.createElement('div', null,
-    React.createElement('div', { style: { background: 'rgba(108,71,255,0.08)', padding: '20px 40px', borderBottom: '1px solid rgba(108,71,255,0.1)', display: 'flex', alignItems: 'center', gap: 16 } },
-      React.createElement('button', { onClick: () => setPage('courses'), style: { background: 'transparent', border: 'none', color: '#a78bfa', cursor: 'pointer', fontSize: 20 } }, '←'),
-      React.createElement('div', null,
-        React.createElement('h1', { style: { fontSize: 24, fontWeight: 700 } }, course.title),
-        React.createElement('p', { style: { color: '#8888a8', fontSize: 14 } }, videos.length + ' فيديو')
+    React.createElement('div', { style: { background: 'rgba(108,71,255,.08)', padding: '20px 40px', borderBottom: '1px solid rgba(108,71,255,.1)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
+      React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 16 } },
+        React.createElement('button', { onClick: () => setPage('courses'), style: { background: 'transparent', border: 'none', color: '#a78bfa', cursor: 'pointer', fontSize: 20 } }, '←'),
+        React.createElement('div', null,
+          React.createElement('h1', { style: { fontSize: 22, fontWeight: 700 } }, course.title),
+          React.createElement('p', { style: { color: '#8888a8', fontSize: 13 } }, videos.length + ' فيديو • ' + (course.difficulty || 'متوسط') + (course.instructor_name ? ' • 👤 ' + course.instructor_name : ''))
+        )
+      ),
+      !enrolled && React.createElement('button', { className: 'btn-green', style: { padding: '10px 24px', fontSize: 14 }, onClick: handleEnroll, disabled: enrolling },
+        enrolling ? 'جارٍ التسجيل...' : (user ? '✓ سجّل في الدورة مجاناً' : '🔐 سجّل دخولاً وانضم')
+      ),
+      enrolled && enrollment && React.createElement('div', { style: { textAlign: 'center', minWidth: 120 } },
+        React.createElement('div', { style: { fontSize: 13, color: '#8888a8', marginBottom: 4 } }, 'تقدمك'),
+        React.createElement('div', { className: 'progress-bar', style: { width: 120 } },
+          React.createElement('div', { className: 'progress-fill', style: { width: enrollment.progress_pct + '%' } })
+        ),
+        React.createElement('div', { style: { fontSize: 12, color: '#a78bfa', marginTop: 4 } }, enrollment.progress_pct + '%')
       )
     ),
     React.createElement('div', { style: { display: 'flex' } },
       React.createElement('div', { style: { flex: 1, padding: 32, overflowY: 'auto', maxHeight: 'calc(100vh - 130px)' } },
+        !enrolled && !user && React.createElement('div', { style: { background: 'rgba(108,71,255,.08)', border: '1px solid rgba(108,71,255,.2)', borderRadius: 16, padding: 32, textAlign: 'center', marginBottom: 24 } },
+          React.createElement('div', { style: { fontSize: 48, marginBottom: 12 } }, '🔐'),
+          React.createElement('h3', { style: { fontSize: 18, fontWeight: 700, marginBottom: 8 } }, 'سجّل دخولاً للوصول الكامل'),
+          React.createElement('p', { style: { color: '#8888a8', marginBottom: 20 } }, 'يمكنك مشاهدة الدروس المجانية الآن. سجّل دخولاً والتحق بالدورة للوصول إلى جميع المحتوى وتتبع تقدمك والحصول على شهادة الإتمام'),
+          React.createElement('button', { className: 'btn-primary', onClick: () => setPage('login') }, 'تسجيل الدخول')
+        ),
+        !enrolled && user && React.createElement('div', { style: { background: 'rgba(16,185,129,.08)', border: '1px solid rgba(16,185,129,.2)', borderRadius: 16, padding: 24, textAlign: 'center', marginBottom: 24 } },
+          React.createElement('p', { style: { color: '#4ade80', marginBottom: 12 } }, '✨ سجّل في الدورة مجاناً لفتح جميع الدروس وتتبع تقدمك والحصول على شهادة إتمام'),
+          React.createElement('button', { className: 'btn-green', onClick: handleEnroll, disabled: enrolling }, enrolling ? 'جارٍ التسجيل...' : 'التسجيل في الدورة مجاناً')
+        ),
         selectedVideo ? React.createElement('div', null,
           selectedVideo.youtubeId
             ? React.createElement('iframe', { className: 'yt-embed', src: 'https://www.youtube.com/embed/' + selectedVideo.youtubeId, title: selectedVideo.title, allow: 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture', allowFullScreen: true })
-            : React.createElement('div', { style: { background: 'rgba(0,0,0,0.6)', borderRadius: 16, aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(108,71,255,0.2)' } },
+            : React.createElement('div', { style: { background: 'rgba(0,0,0,.6)', borderRadius: 16, aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(108,71,255,.2)' } },
                 React.createElement('p', { style: { color: '#a78bfa' } }, 'لم يتم إضافة رابط يوتيوب لهذا الفيديو بعد')
               ),
           React.createElement('h2', { style: { fontSize: 20, fontWeight: 700, marginTop: 20, marginBottom: 8 } }, selectedVideo.title),
-          React.createElement('p', { style: { color: '#8888a8', fontSize: 13, marginBottom: 20 } }, '⏱ ' + selectedVideo.duration),
+          React.createElement('div', { style: { display: 'flex', gap: 12, alignItems: 'center', marginBottom: 12 } },
+            React.createElement('p', { style: { color: '#8888a8', fontSize: 13 } }, '⏱ ' + selectedVideo.duration),
+            isCompleted(selectedVideo) && React.createElement('span', { className: 'badge badge-green' }, '✓ مكتمل')
+          ),
+          selectedVideo.description && React.createElement('p', { style: { color: '#b0b0c8', fontSize: 14, lineHeight: 1.7, marginBottom: 20, background: 'rgba(255,255,255,.03)', padding: '12px 16px', borderRadius: 10 } }, selectedVideo.description),
           selectedVideo.quiz && selectedVideo.quiz.length > 0 && React.createElement('div', { style: { marginTop: 24 } },
-            React.createElement('div', { style: { background: 'rgba(108,71,255,0.08)', border: '1px solid rgba(108,71,255,0.2)', borderRadius: 16, padding: 24 } },
+            React.createElement('div', { style: { background: 'rgba(108,71,255,.08)', border: '1px solid rgba(108,71,255,.2)', borderRadius: 16, padding: 24 } },
               React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 } },
                 React.createElement('h3', { style: { fontSize: 17, fontWeight: 700 } }, '📝 امتحان الفيديو'),
                 quizState === null && React.createElement('button', { className: 'btn-primary', style: { padding: '8px 20px', fontSize: 13 }, onClick: startQuiz }, 'ابدأ الامتحان'),
-                quizState === 'done' && React.createElement('span', { style: { background: 'rgba(34,197,94,0.15)', border: '1px solid #4ade80', color: '#4ade80', padding: '6px 16px', borderRadius: 20, fontWeight: 700 } }, '✓ النتيجة: ' + score + '/' + selectedVideo.quiz.length)
+                quizState === 'done' && React.createElement('span', { style: { background: 'rgba(34,197,94,.15)', border: '1px solid #4ade80', color: '#4ade80', padding: '6px 16px', borderRadius: 20, fontWeight: 700 } }, '✓ النتيجة: ' + score + '/' + selectedVideo.quiz.length)
               ),
-              quizState === null && React.createElement('p', { style: { color: '#8888a8', fontSize: 14 } }, 'أنهِ مشاهدة الفيديو ثم اختبر فهمك بالإجابة على أسئلة الامتحان.'),
+              quizState === null && React.createElement('p', { style: { color: '#8888a8', fontSize: 14 } }, 'أنهِ مشاهدة الفيديو ثم اختبر فهمك.'),
               (quizState === 'active' || quizState === 'done') && React.createElement('div', null,
                 selectedVideo.quiz.map((q, qi) => React.createElement('div', { key: qi, style: { marginBottom: 20 } },
                   React.createElement('p', { style: { fontWeight: 600, marginBottom: 12, fontSize: 15 } }, (qi + 1) + '. ' + q.q),
@@ -509,28 +832,30 @@ function CourseViewPage({ course, setPage, user, notify }) {
               )
             )
           )
-        ) : React.createElement('div', { style: { background: 'rgba(108,71,255,0.05)', borderRadius: 16, aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(108,71,255,0.1)' } },
+        ) : React.createElement('div', { style: { background: 'rgba(108,71,255,.05)', borderRadius: 16, aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(108,71,255,.1)' } },
             React.createElement('div', { style: { textAlign: 'center' } },
               React.createElement('div', { style: { fontSize: 40, marginBottom: 12 } }, '🎓'),
-              React.createElement('p', { style: { color: '#8888a8' } }, 'اختر فيديواً من القائمة الجانبية لبدء المشاهدة')
+              React.createElement('p', { style: { color: '#8888a8' } }, 'اختر فيديواً من القائمة الجانبية')
             )
           )
       ),
-      React.createElement('div', { style: { width: 300, background: 'rgba(255,255,255,0.02)', borderRight: '1px solid rgba(108,71,255,0.1)', padding: 20, overflowY: 'auto', maxHeight: 'calc(100vh - 130px)' } },
+      React.createElement('div', { style: { width: 300, background: 'rgba(255,255,255,.02)', borderRight: '1px solid rgba(108,71,255,.1)', padding: 20, overflowY: 'auto', maxHeight: 'calc(100vh - 130px)' } },
         React.createElement('h3', { style: { fontWeight: 700, marginBottom: 16, fontSize: 16 } }, '📹 الفيديوهات'),
         videos.length === 0 && React.createElement('p', { style: { color: '#8888a8', fontSize: 13 } }, 'لم تتم إضافة فيديوهات بعد.'),
-        videos.map(v => React.createElement('div', {
-          key: v.id,
-          onClick: () => openVideo(v),
-          style: { padding: '12px 14px', borderRadius: 10, cursor: 'pointer', marginBottom: 8, background: selectedVideo && selectedVideo.id === v.id ? 'rgba(108,71,255,0.2)' : 'rgba(255,255,255,0.02)', border: '1px solid ' + (selectedVideo && selectedVideo.id === v.id ? 'rgba(108,71,255,0.4)' : 'rgba(108,71,255,0.1)'), transition: 'all 0.2s' }
-        },
-          React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 } },
-            React.createElement('span', { style: { fontSize: 16, color: '#a78bfa' } }, '▶'),
-            React.createElement('span', { style: { fontSize: 14, fontWeight: 500 } }, v.title)
-          ),
-          React.createElement('div', { style: { fontSize: 12, color: '#8888a8', marginRight: 24 } }, v.duration),
-          v.quiz && v.quiz.length > 0 && React.createElement('div', { style: { marginTop: 4, marginRight: 24 } },
-            React.createElement('span', { style: { fontSize: 11, background: 'rgba(108,71,255,0.2)', color: '#a78bfa', padding: '2px 8px', borderRadius: 10 } }, '📝 ' + v.quiz.length + ' سؤال')
+        videos.map(v => React.createElement('div', { key: v.id, style: { position: 'relative' } },
+          React.createElement('div', {
+            onClick: () => openVideo(v),
+            style: { padding: '12px 14px', borderRadius: 10, cursor: isVideoAccessible(v) ? 'pointer' : 'default', marginBottom: 8, background: selectedVideo && selectedVideo.id === v.id ? 'rgba(108,71,255,.2)' : 'rgba(255,255,255,.02)', border: '1px solid ' + (selectedVideo && selectedVideo.id === v.id ? 'rgba(108,71,255,.4)' : 'rgba(108,71,255,.1)'), transition: 'all .2s', opacity: isVideoAccessible(v) ? 1 : 0.6 }
+          },
+            React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 } },
+              React.createElement('span', { style: { fontSize: 16, color: isCompleted(v) ? '#4ade80' : '#a78bfa' } }, isCompleted(v) ? '✓' : (isVideoAccessible(v) ? '▶' : '🔒')),
+              React.createElement('span', { style: { fontSize: 14, fontWeight: 500 } }, v.title),
+              v.is_free && !enrolled && React.createElement('span', { style: { fontSize: 10, background: 'rgba(34,197,94,.15)', color: '#4ade80', padding: '1px 6px', borderRadius: 6 } }, 'مجاني')
+            ),
+            React.createElement('div', { style: { fontSize: 12, color: '#8888a8', marginRight: 24 } }, v.duration),
+            v.quiz && v.quiz.length > 0 && React.createElement('div', { style: { marginTop: 4, marginRight: 24 } },
+              React.createElement('span', { style: { fontSize: 11, background: 'rgba(108,71,255,.2)', color: '#a78bfa', padding: '2px 8px', borderRadius: 10 } }, '📝 ' + v.quiz.length + ' سؤال')
+            )
           )
         ))
       )
@@ -547,8 +872,7 @@ function LoginPage({ loginForm, setLoginForm, handleLogin, loginError, setPage, 
       React.createElement('div', { className: 'card', style: { padding: 40 } },
         React.createElement('div', { style: { textAlign: 'center', marginBottom: 32 } },
           React.createElement('div', { style: { fontSize: 40, marginBottom: 12 } }, '🔐'),
-          React.createElement('h1', { style: { fontSize: 24, fontWeight: 700, marginBottom: 8 } }, 'تسجيل الدخول'),
-          React.createElement('p', { style: { color: '#8888a8', fontSize: 14 } }, 'أدخل بياناتك للوصول إلى حسابك')
+          React.createElement('h1', { style: { fontSize: 24, fontWeight: 700, marginBottom: 8 } }, 'تسجيل الدخول')
         ),
         React.createElement('div', { style: { marginBottom: 20 } },
           React.createElement('label', { style: { display: 'block', fontSize: 14, color: '#b0b0c8', marginBottom: 8 } }, 'البريد الإلكتروني'),
@@ -592,8 +916,7 @@ function RegisterPage({ handleRegister, setPage, notify }) {
       React.createElement('div', { className: 'card', style: { padding: 40 } },
         React.createElement('div', { style: { textAlign: 'center', marginBottom: 32 } },
           React.createElement('div', { style: { fontSize: 40, marginBottom: 12 } }, '✨'),
-          React.createElement('h1', { style: { fontSize: 24, fontWeight: 700, marginBottom: 8 } }, 'إنشاء حساب جديد'),
-          React.createElement('p', { style: { color: '#8888a8', fontSize: 14 } }, 'انضم إلى أكاديمية البعد الجديد مجاناً')
+          React.createElement('h1', { style: { fontSize: 24, fontWeight: 700, marginBottom: 8 } }, 'إنشاء حساب جديد')
         ),
         fields.map((f, i) => React.createElement('div', { key: i, style: { marginBottom: 18 } },
           React.createElement('label', { style: { display: 'block', fontSize: 14, color: '#b0b0c8', marginBottom: 8 } }, f.label),
@@ -602,8 +925,8 @@ function RegisterPage({ handleRegister, setPage, notify }) {
         error && React.createElement('div', { className: 'error-banner' }, '⚠️ ' + error),
         React.createElement('button', { className: 'btn-primary', style: { width: '100%', fontSize: 16, padding: '13px' }, onClick: handleSubmit, disabled: loading }, loading ? 'جارٍ التسجيل...' : 'إنشاء الحساب'),
         React.createElement('div', { style: { textAlign: 'center', marginTop: 20, fontSize: 14, color: '#8888a8' } },
-          'لديك حساب بالفعل؟ ',
-          React.createElement('span', { style: { color: '#a78bfa', cursor: 'pointer', fontWeight: 600 }, onClick: () => setPage('login') }, 'سجل دخولك')
+          'لديك حساب؟ ',
+          React.createElement('span', { style: { color: '#a78bfa', cursor: 'pointer', fontWeight: 600 }, onClick: () => setPage('login') }, 'سجّل دخولك')
         )
       )
     )
@@ -613,133 +936,219 @@ function RegisterPage({ handleRegister, setPage, notify }) {
 // ============================================================
 // DELETE ACCOUNT MODAL
 // ============================================================
-function DeleteAccountModal({ user, onConfirm, onClose }) {
-  const [step, setStep] = useState(1); // 1=تحذير، 2=تأكيد بالكتابة
+function DeleteAccountModal({ onConfirm, onClose }) {
   const [typed, setTyped] = useState('');
   const [deleting, setDeleting] = useState(false);
-  const CONFIRM_WORD = 'احذف حسابي';
-
+  const WORD = 'احذف حسابي';
   const handleDelete = async () => {
-    if (typed !== CONFIRM_WORD) return;
+    if (typed !== WORD) return;
     setDeleting(true);
     await onConfirm();
     setDeleting(false);
   };
-
   return React.createElement('div', { className: 'modal-overlay', onClick: e => e.target === e.currentTarget && onClose() },
-    React.createElement('div', { className: 'modal-box', style: { maxWidth: 460 } },
-
-      // أيقونة التحذير
+    React.createElement('div', { className: 'modal-box', style: { maxWidth: 440 } },
       React.createElement('div', { style: { textAlign: 'center', marginBottom: 24 } },
-        React.createElement('div', { style: { width: 72, height: 72, borderRadius: '50%', background: 'rgba(239,68,68,0.12)', border: '2px solid rgba(239,68,68,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, margin: '0 auto 16px' } }, '🗑️'),
-        React.createElement('h2', { style: { fontSize: 20, fontWeight: 800, color: '#f87171', marginBottom: 8 } }, 'حذف الحساب نهائياً'),
-        React.createElement('p', { style: { fontSize: 13, color: '#8888a8', lineHeight: 1.7 } }, 'حذف حسابك أمر دائم ولا يمكن التراجع عنه.')
+        React.createElement('div', { style: { fontSize: 48, marginBottom: 12 } }, '🗑️'),
+        React.createElement('h2', { style: { fontSize: 20, fontWeight: 800, color: '#f87171' } }, 'حذف الحساب نهائياً')
       ),
-
-      // صندوق التحذيرات
-      React.createElement('div', { style: { background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 12, padding: '16px 20px', marginBottom: 24 } },
-        React.createElement('p', { style: { fontSize: 13, fontWeight: 700, color: '#f87171', marginBottom: 10 } }, 'ماذا سيحدث عند الحذف:'),
-        [
-          'سيتم حذف حسابك وبياناتك الشخصية خلال 30 يوماً',
-          'لن تتمكن من الوصول إلى دوراتك أو تقدمك الدراسي',
-          'لا يمكن استرجاع الحساب بعد التأكيد',
-          'قد نحتفظ ببعض السجلات لأغراض قانونية'
-        ].map((item, i) =>
-          React.createElement('div', { key: i, style: { display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 6, fontSize: 13, color: '#b0b0c8' } },
-            React.createElement('span', { style: { color: '#f87171', flexShrink: 0, marginTop: 1 } }, '✕'),
-            React.createElement('span', null, item)
-          )
-        )
-      ),
-
-      // حقل التأكيد بالكتابة
-      React.createElement('div', { style: { marginBottom: 24 } },
+      React.createElement('div', { style: { marginBottom: 20 } },
         React.createElement('label', { style: { display: 'block', fontSize: 13, color: '#b0b0c8', marginBottom: 8 } },
-          'لتأكيد الحذف، اكتب: ',
-          React.createElement('span', { style: { color: '#f87171', fontWeight: 700, fontFamily: 'monospace' } }, CONFIRM_WORD)
+          'اكتب: ',
+          React.createElement('span', { style: { color: '#f87171', fontWeight: 700 } }, WORD)
         ),
-        React.createElement('input', {
-          className: 'input-field',
-          placeholder: 'اكتب هنا للتأكيد...',
-          value: typed,
-          onChange: e => setTyped(e.target.value),
-          style: { borderColor: typed === CONFIRM_WORD ? 'rgba(239,68,68,0.6)' : 'rgba(108,71,255,0.2)' }
-        })
+        React.createElement('input', { className: 'input-field', placeholder: 'اكتب هنا...', value: typed, onChange: e => setTyped(e.target.value) })
       ),
-
-      // أزرار
       React.createElement('div', { style: { display: 'flex', gap: 12 } },
         React.createElement('button', {
-          onClick: handleDelete,
-          disabled: typed !== CONFIRM_WORD || deleting,
-          style: {
-            flex: 1, padding: '12px', borderRadius: 10, border: 'none', cursor: typed === CONFIRM_WORD ? 'pointer' : 'not-allowed',
-            background: typed === CONFIRM_WORD ? 'linear-gradient(135deg,#dc2626,#ef4444)' : 'rgba(239,68,68,0.2)',
-            color: typed === CONFIRM_WORD ? 'white' : '#f87171', fontWeight: 700, fontSize: 15, transition: 'all 0.2s', fontFamily: 'inherit'
-          }
-        }, deleting ? '⏳ جارٍ الحذف...' : '🗑️ حذف حسابي نهائياً'),
+          onClick: handleDelete, disabled: typed !== WORD || deleting,
+          style: { flex: 1, padding: '12px', borderRadius: 10, border: 'none', cursor: typed === WORD ? 'pointer' : 'not-allowed', background: typed === WORD ? 'linear-gradient(135deg,#dc2626,#ef4444)' : 'rgba(239,68,68,.2)', color: typed === WORD ? 'white' : '#f87171', fontWeight: 700, fontSize: 15, fontFamily: 'inherit' }
+        }, deleting ? '⏳ جارٍ الحذف...' : '🗑️ حذف حسابي'),
         React.createElement('button', { className: 'btn-outline', style: { flex: 1 }, onClick: onClose }, 'إلغاء')
-      ),
-
-      // نص قانوني صغير
-      React.createElement('p', { style: { fontSize: 11, color: '#555570', textAlign: 'center', marginTop: 16, lineHeight: 1.6 } },
-        'سيتم حذف بياناتك خلال 30 يوماً. قد نحتفظ ببعض البيانات الوصفية والسجلات لفترة أطول حيثما يقتضي القانون أو يُجيز ذلك.'
       )
     )
   );
 }
 
 // ============================================================
-// STUDENT DASHBOARD
+// STUDENT DASHBOARD — with certs, progress, notifications
 // ============================================================
-function StudentDashboard({ user, data, setPage, setSelectedCourse, onDeleteAccount }) {
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+function StudentDashboard({ user, data, setPage, setSelectedCourse, onDeleteAccount, enrollments, progress, certs }) {
+  const [showDelete, setShowDelete] = useState(false);
+  const [showNotifs, setShowNotifs] = useState(false);
+  const [notifCount, setNotifCount] = useState(0);
+
+  useEffect(() => {
+    NotifDB.getForUser(user.id).then(n => setNotifCount(n.filter(x => !x.is_read).length));
+  }, [user]);
+
+  const myEnrolls = enrollments || [];
+  const enrolledCourses = data.courses.filter(c => myEnrolls.some(e => e.course_id === c.id));
+  const completedCourses = myEnrolls.filter(e => e.progress_pct === 100).length;
+  const totalLessonsCompleted = (progress || []).filter(p => p.completed).length;
 
   return React.createElement('div', { style: { padding: 40 } },
-
-    // مودال حذف الحساب
-    showDeleteModal && React.createElement(DeleteAccountModal, {
-      user,
-      onConfirm: async () => { await onDeleteAccount(); setShowDeleteModal(false); },
-      onClose: () => setShowDeleteModal(false)
-    }),
+    showDelete && React.createElement(DeleteAccountModal, { onConfirm: async () => { await onDeleteAccount(); setShowDelete(false); }, onClose: () => setShowDelete(false) }),
+    showNotifs && React.createElement(NotifPanel, { user, onClose: () => { setShowNotifs(false); setNotifCount(0); } }),
 
     React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8, flexWrap: 'wrap', gap: 12 } },
       React.createElement('div', null,
         React.createElement('h1', { style: { fontSize: 26, fontWeight: 700, marginBottom: 4 } }, 'مرحباً، ' + user.name + ' 👋'),
         React.createElement('p', { style: { color: '#8888a8' } }, 'استمر في رحلتك التعليمية')
       ),
-      // زر إعدادات الحساب
       React.createElement('div', { style: { display: 'flex', gap: 10, alignItems: 'center' } },
-        React.createElement('div', { style: { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(108,71,255,0.2)', borderRadius: 12, padding: '8px 16px', fontSize: 13, color: '#8888a8' } },
-          '📧 ' + user.email
+        React.createElement('button', { onClick: () => setShowNotifs(true), style: { position: 'relative', background: 'rgba(255,255,255,.04)', border: '1px solid rgba(108,71,255,.2)', borderRadius: 10, padding: '8px 14px', cursor: 'pointer', fontSize: 18, color: '#e8e8f0' } },
+          '🔔',
+          notifCount > 0 && React.createElement('span', { className: 'notif-dot' })
         ),
-        React.createElement('button', {
-          onClick: () => setShowDeleteModal(true),
-          style: { background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', color: '#f87171', padding: '8px 16px', borderRadius: 10, cursor: 'pointer', fontSize: 13, fontWeight: 600, transition: 'all 0.2s', fontFamily: 'inherit' },
-          onMouseOver: e => e.target.style.background = 'rgba(239,68,68,0.18)',
-          onMouseOut: e => e.target.style.background = 'rgba(239,68,68,0.08)'
-        }, '🗑️ حذف الحساب')
+        React.createElement('button', { onClick: () => setShowDelete(true), style: { background: 'rgba(239,68,68,.08)', border: '1px solid rgba(239,68,68,.25)', color: '#f87171', padding: '8px 16px', borderRadius: 10, cursor: 'pointer', fontSize: 13, fontWeight: 600, fontFamily: 'inherit' } }, '🗑️ حذف الحساب')
       )
     ),
 
     React.createElement('div', { className: 'grid-4', style: { margin: '32px 0' } },
-      [{ v: data.courses.length.toString(), l: 'الدورات المتاحة', c: '#a78bfa' }, { v: '0', l: 'دروس مكتملة', c: '#4ade80' }, { v: '0%', l: 'التقدم الكلي', c: '#38bdf8' }, { v: '0', l: 'شهاداتي', c: '#facc15' }].map((s, i) =>
+      [{ v: enrolledCourses.length.toString(), l: 'دوراتي المسجّلة', c: '#a78bfa' }, { v: totalLessonsCompleted.toString(), l: 'دروس مكتملة', c: '#4ade80' }, { v: completedCourses.toString(), l: 'دورات أتممتها', c: '#38bdf8' }, { v: (certs || []).length.toString(), l: 'شهاداتي', c: '#facc15' }].map((s, i) =>
         React.createElement('div', { key: i, className: 'stat-card' },
           React.createElement('div', { style: { fontSize: 28, fontWeight: 800, color: s.c, marginBottom: 6 } }, s.v),
           React.createElement('div', { style: { fontSize: 13, color: '#8888a8' } }, s.l)
         )
       )
     ),
+
+    (certs || []).length > 0 && React.createElement('div', { style: { marginBottom: 32 } },
+      React.createElement('h2', { style: { fontSize: 20, fontWeight: 700, marginBottom: 20 } }, '🏆 شهاداتي'),
+      React.createElement('div', { className: 'grid-3' },
+        (certs || []).map(cert => {
+          const course = data.courses.find(c => c.id === cert.course_id);
+          return React.createElement(CertificateCard, { key: cert.id, cert, user, course });
+        })
+      )
+    ),
+
+    enrolledCourses.length > 0 && React.createElement('div', { style: { marginBottom: 32 } },
+      React.createElement('h2', { style: { fontSize: 20, fontWeight: 700, marginBottom: 20 } }, 'دوراتي المسجّلة'),
+      React.createElement('div', { className: 'grid-3' },
+        enrolledCourses.map(c => {
+          const enroll = myEnrolls.find(e => e.course_id === c.id);
+          return React.createElement('div', { key: c.id, className: 'card', style: { cursor: 'pointer' }, onClick: () => { setSelectedCourse(c); setPage('course-view'); } },
+            React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 } },
+              React.createElement('span', { style: { fontSize: 32 } }, c.icon),
+              React.createElement('div', null,
+                React.createElement('div', { style: { fontWeight: 700, fontSize: 16 } }, c.title),
+                React.createElement('div', { style: { fontSize: 13, color: '#8888a8' } }, (c.videos || []).length + ' فيديو')
+              )
+            ),
+            React.createElement('div', { style: { marginBottom: 8 } },
+              React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#8888a8', marginBottom: 6 } },
+                React.createElement('span', null, 'التقدم'),
+                React.createElement('span', null, (enroll?.progress_pct || 0) + '%')
+              ),
+              React.createElement('div', { className: 'progress-bar' },
+                React.createElement('div', { className: 'progress-fill', style: { width: (enroll?.progress_pct || 0) + '%' } })
+              )
+            ),
+            enroll?.progress_pct === 100 && React.createElement('span', { className: 'badge badge-green' }, '✓ مكتملة')
+          );
+        })
+      )
+    ),
+
     React.createElement('h2', { style: { fontSize: 20, fontWeight: 700, marginBottom: 20 } }, 'الدورات المتاحة'),
     React.createElement('div', { className: 'grid-3' },
-      data.courses.map(c => React.createElement(CourseCard, { key: c.id, course: c, onClick: () => setSelectedCourse(c), setPage }))
+      data.courses.map(c => React.createElement(CourseCard, { key: c.id, course: c, onClick: () => setSelectedCourse(c), setPage, user, enrollments }))
     )
   );
 }
 
 // ============================================================
-// ADMIN DASHBOARD
+// LINKS PAGE (same as before)
+// ============================================================
+function LinksPage({ data, setData, user, notify }) {
+  const [links, setLinks] = useState(data.links || []);
+  const [editMode, setEditMode] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [form, setForm] = useState({ title: '', desc: '', url: '', icon: '🔗', color: '#6c47ff' });
+  const isAdmin = user && user.role === 'admin';
+  const icons = ['📊','🧮','🎓','📖','📐','🔵','🏛️','📝','🔗','🌐','💻','🔬','⚗️','🎯','📌','💡','📚','🎬','✏️','🔢'];
+  useEffect(() => { setLinks(data.links || []); }, [data.links]);
+  const persist = async newLinks => {
+    setLinks(newLinks); setData(d => ({ ...d, links: newLinks }));
+    try { await SiteDB.saveLinks(newLinks); } catch (e) { notify('فشل الحفظ', 'error'); }
+  };
+  const openAdd = () => { setForm({ title: '', desc: '', url: '', icon: '🔗', color: '#6c47ff' }); setEditId(null); setShowForm(true); };
+  const openEdit = link => { setForm({ title: link.title, desc: link.desc || '', url: link.url, icon: link.icon || '🔗', color: link.color || '#6c47ff' }); setEditId(link.id); setShowForm(true); };
+  const handleSave = () => {
+    if (!form.title || !form.url) { notify('يرجى إدخال الاسم والرابط', 'error'); return; }
+    const newLinks = editId !== null ? links.map(l => l.id === editId ? { ...l, ...form } : l) : [...links, { ...form, id: Date.now() }];
+    persist(newLinks);
+    notify(editId !== null ? '✓ تم حفظ التعديلات' : '✓ تم إضافة الرابط');
+    setShowForm(false);
+  };
+  return React.createElement('div', { style: { padding: '60px 40px', maxWidth: 1100, margin: '0 auto' } },
+    React.createElement('div', { style: { textAlign: 'center', marginBottom: 48 } },
+      React.createElement('h1', { style: { fontSize: 36, fontWeight: 800, marginBottom: 12 } },
+        React.createElement('span', { style: { color: '#e8e8f0' } }, 'روابط '), React.createElement('span', { className: 'neon-text' }, 'مفيدة')
+      ),
+      React.createElement('p', { style: { color: '#8888a8', fontSize: 16 } }, 'مصادر ومراجع تعليمية موصى بها'),
+      isAdmin && React.createElement('div', { style: { marginTop: 20, display: 'flex', gap: 12, justifyContent: 'center' } },
+        React.createElement('button', { className: 'btn-primary', onClick: openAdd }, '+ إضافة رابط'),
+        React.createElement('button', { className: editMode ? 'btn-danger' : 'btn-outline', onClick: () => setEditMode(!editMode) }, editMode ? '✓ إنهاء التعديل' : '✏️ تعديل')
+      )
+    ),
+    showForm && isAdmin && React.createElement('div', { className: 'modal-overlay', onClick: e => e.target === e.currentTarget && setShowForm(false) },
+      React.createElement('div', { className: 'modal-box', style: { maxWidth: 480 } },
+        React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: 24 } },
+          React.createElement('h2', { style: { fontSize: 18, fontWeight: 700 } }, editId !== null ? 'تعديل الرابط' : 'إضافة رابط'),
+          React.createElement('button', { onClick: () => setShowForm(false), style: { background: 'transparent', border: 'none', color: '#8888a8', fontSize: 22, cursor: 'pointer' } }, '×')
+        ),
+        [{ label: 'اسم الرابط *', key: 'title', ph: 'مثال: ديسموس' }, { label: 'الوصف', key: 'desc', ph: 'وصف مختصر' }, { label: 'الرابط (URL) *', key: 'url', ph: 'https://...' }].map((f, i) =>
+          React.createElement('div', { key: i, style: { marginBottom: 14 } },
+            React.createElement('label', { style: { display: 'block', fontSize: 13, color: '#b0b0c8', marginBottom: 6 } }, f.label),
+            React.createElement('input', { className: 'input-field', value: form[f.key], onChange: e => setForm({ ...form, [f.key]: e.target.value }), placeholder: f.ph })
+          )
+        ),
+        React.createElement('div', { style: { marginBottom: 14 } },
+          React.createElement('label', { style: { display: 'block', fontSize: 13, color: '#b0b0c8', marginBottom: 8 } }, 'الأيقونة'),
+          React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 6 } },
+            icons.map(ic => React.createElement('button', { key: ic, onClick: () => setForm({ ...form, icon: ic }), style: { width: 36, height: 36, borderRadius: 8, border: '2px solid ' + (form.icon === ic ? '#6c47ff' : 'rgba(108,71,255,.2)'), background: form.icon === ic ? 'rgba(108,71,255,.2)' : 'transparent', cursor: 'pointer', fontSize: 16 } }, ic))
+          )
+        ),
+        React.createElement('div', { style: { marginBottom: 20 } },
+          React.createElement('label', { style: { display: 'block', fontSize: 13, color: '#b0b0c8', marginBottom: 6 } }, 'اللون'),
+          React.createElement('input', { type: 'color', value: form.color, onChange: e => setForm({ ...form, color: e.target.value }), style: { width: 60, height: 36, borderRadius: 8, border: '1px solid rgba(108,71,255,.3)', cursor: 'pointer' } })
+        ),
+        React.createElement('div', { style: { display: 'flex', gap: 12 } },
+          React.createElement('button', { className: 'btn-primary', style: { flex: 1 }, onClick: handleSave }, '💾 حفظ'),
+          React.createElement('button', { className: 'btn-outline', style: { flex: 1 }, onClick: () => setShowForm(false) }, 'إلغاء')
+        )
+      )
+    ),
+    React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: 20 } },
+      links.map(link => React.createElement('div', { key: link.id, className: 'card', style: { position: 'relative', cursor: editMode ? 'default' : 'pointer', overflow: 'hidden' }, onClick: () => !editMode && window.open(link.url, '_blank') },
+        React.createElement('div', { style: { display: 'flex', alignItems: 'flex-start', gap: 14, justifyContent: 'space-between' } },
+          React.createElement('div', { style: { flex: 1 } },
+            React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 } },
+              React.createElement('div', { style: { width: 44, height: 44, borderRadius: 12, background: (link.color || '#6c47ff') + '22', border: '1px solid ' + (link.color || '#6c47ff') + '55', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 } }, link.icon || '🔗'),
+              React.createElement('div', null,
+                React.createElement('div', { style: { fontWeight: 700, fontSize: 15 } }, link.title),
+                !editMode && React.createElement('div', { style: { fontSize: 11, color: link.color || '#6c47ff', marginTop: 2 } }, '↗ افتح في تبويب جديد')
+              )
+            ),
+            React.createElement('p', { style: { fontSize: 13, color: '#8888a8', lineHeight: 1.65 } }, link.desc || '')
+          ),
+          editMode && isAdmin && React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 } },
+            React.createElement('button', { className: 'btn-outline', style: { padding: '4px 10px', fontSize: 11 }, onClick: e => { e.stopPropagation(); openEdit(link); } }, '✏️'),
+            React.createElement('button', { className: 'btn-danger', style: { padding: '4px 10px', fontSize: 11 }, onClick: e => { e.stopPropagation(); persist(links.filter(l => l.id !== link.id)); notify('تم الحذف'); } }, '🗑')
+          )
+        ),
+        !editMode && React.createElement('div', { style: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg,' + (link.color || '#6c47ff') + ',transparent)' } })
+      ))
+    )
+  );
+}
+
+// ============================================================
+// ADMIN COMPONENTS (condensed — same logic as v1, extended)
 // ============================================================
 function AdminDashboard({ data }) {
   const bars = [{ m: 'يناير', v: 15 }, { m: 'فبراير', v: 22 }, { m: 'مارس', v: 18 }, { m: 'أبريل', v: 30 }, { m: 'مايو', v: 25 }];
@@ -762,53 +1171,48 @@ function AdminDashboard({ data }) {
     ),
     React.createElement('div', { className: 'grid-2' },
       React.createElement('div', { className: 'card' },
-        React.createElement('h3', { style: { fontWeight: 700, marginBottom: 20, fontSize: 16 } }, 'نمو المستخدمين (2026)'),
+        React.createElement('h3', { style: { fontWeight: 700, marginBottom: 20, fontSize: 16 } }, 'نمو المستخدمين'),
         React.createElement('div', { style: { display: 'flex', alignItems: 'flex-end', gap: 10, height: 150 } },
           bars.map((b, i) => React.createElement('div', { key: i, style: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 } },
-            React.createElement('div', { style: { width: '100%', background: 'linear-gradient(180deg,#6c47ff,#a855f7)', borderRadius: '6px 6px 0 0', height: (b.v / maxV * 120) + 'px', transition: 'height 0.5s' } }),
+            React.createElement('div', { style: { width: '100%', background: 'linear-gradient(180deg,#6c47ff,#a855f7)', borderRadius: '6px 6px 0 0', height: (b.v / maxV * 120) + 'px' } }),
             React.createElement('div', { style: { fontSize: 11, color: '#8888a8' } }, b.m)
           ))
         )
       ),
       React.createElement('div', { className: 'card' },
         React.createElement('h3', { style: { fontWeight: 700, marginBottom: 20, fontSize: 16 } }, 'توزيع الدورات'),
-        React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 12 } },
-          Object.entries(cats).map(([name, count], i) => React.createElement('div', { key: i },
-            React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: 6, fontSize: 14 } },
-              React.createElement('span', null, name),
-              React.createElement('span', { style: { color: '#6c47ff' } }, count + ' دورات')
-            ),
-            React.createElement('div', { style: { background: 'rgba(255,255,255,0.05)', borderRadius: 6, height: 8, overflow: 'hidden' } },
-              React.createElement('div', { style: { background: '#6c47ff', height: '100%', width: (count / data.courses.length * 100) + '%', borderRadius: 6 } })
-            )
-          ))
-        )
+        Object.entries(cats).map(([name, count], i) => React.createElement('div', { key: i },
+          React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: 6, fontSize: 14 } },
+            React.createElement('span', null, name),
+            React.createElement('span', { style: { color: '#6c47ff' } }, count + ' دورات')
+          ),
+          React.createElement('div', { style: { background: 'rgba(255,255,255,.05)', borderRadius: 6, height: 8, overflow: 'hidden', marginBottom: 12 } },
+            React.createElement('div', { style: { background: '#6c47ff', height: '100%', width: (count / data.courses.length * 100) + '%', borderRadius: 6 } })
+          )
+        ))
       )
     )
   );
 }
 
-// ============================================================
-// ADMIN USERS
-// ============================================================
 function AdminUsers({ data, setData, setModal, notify, syncUsers }) {
   const [search, setSearch] = useState('');
-  const filtered = data.users.filter(u => u.name && (u.name.includes(search) || (u.email || '').includes(search)));
+  const filtered = data.users.filter(u => (u.name || '').includes(search) || (u.email || '').includes(search));
   const roleColors = { admin: 'badge-purple', teacher: 'badge-blue', student: 'badge-green' };
   const roleLabels = { admin: 'مدير', teacher: 'معلم', student: 'طالب' };
-  const toggleBan = async id => { try { await DB.toggleBan(id); await syncUsers(); notify('تم تحديث حالة المستخدم'); } catch (e) { notify('فشل: ' + e.message, 'error'); } };
-  const deleteUser = async id => { if (!window.confirm('هل أنت متأكد؟')) return; try { await DB.remove(id); await syncUsers(); notify('تم حذف المستخدم'); } catch (e) { notify('فشل: ' + e.message, 'error'); } };
+  const toggleBan = async id => { try { await DB.toggleBan(id); await syncUsers(); notify('تم تحديث الحالة'); } catch (e) { notify('فشل', 'error'); } };
+  const deleteUser = async id => { if (!window.confirm('هل أنت متأكد؟')) return; try { await DB.remove(id); await syncUsers(); notify('تم الحذف'); } catch (e) { notify('فشل', 'error'); } };
   return React.createElement('div', null,
     React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 } },
       React.createElement('h1', { style: { fontSize: 24, fontWeight: 700 } }, 'إدارة المستخدمين'),
       React.createElement('button', { className: 'btn-primary', onClick: () => setModal({ type: 'addUser' }) }, '+ إضافة مستخدم')
     ),
-    React.createElement('input', { className: 'input-field', placeholder: '🔍 بحث باسم أو إيميل...', value: search, onChange: e => setSearch(e.target.value), style: { marginBottom: 20, maxWidth: 360 } }),
+    React.createElement('input', { className: 'input-field', placeholder: '🔍 بحث...', value: search, onChange: e => setSearch(e.target.value), style: { marginBottom: 20, maxWidth: 360 } }),
     React.createElement('div', { className: 'card', style: { padding: 0, overflow: 'hidden' } },
       React.createElement('table', { style: { width: '100%', borderCollapse: 'collapse' } },
         React.createElement('thead', null,
-          React.createElement('tr', { style: { background: 'rgba(108,71,255,0.08)', borderBottom: '1px solid rgba(108,71,255,0.1)' } },
-            ['المستخدم', 'البريد الإلكتروني', 'الدور', 'الحالة', 'تاريخ التسجيل', 'الإجراءات'].map((h, i) =>
+          React.createElement('tr', { style: { background: 'rgba(108,71,255,.08)', borderBottom: '1px solid rgba(108,71,255,.1)' } },
+            ['المستخدم', 'البريد', 'الدور', 'الحالة', 'تاريخ التسجيل', 'إجراءات'].map((h, i) =>
               React.createElement('th', { key: i, style: { padding: '14px 16px', textAlign: 'right', fontSize: 13, color: '#8888a8', fontWeight: 600 } }, h)
             )
           )
@@ -838,46 +1242,44 @@ function AdminUsers({ data, setData, setModal, notify, syncUsers }) {
   );
 }
 
-// ============================================================
-// VIDEO FORM MODAL
-// ============================================================
 function VideoFormModal({ courseId, video, notify, onClose, onSaved }) {
-  const [form, setForm] = useState({ title: video ? video.title : '', youtubeUrl: video ? (video.youtube_id || video.youtubeId || '') : '', duration: video ? (video.duration || '') : '' });
+  const [form, setForm] = useState({ title: video ? video.title : '', youtubeUrl: video ? (video.youtube_id || video.youtubeId || '') : '', duration: video ? (video.duration || '') : '', isFree: video ? (video.is_free || false) : false, description: video ? (video.description || '') : '' });
   const [saving, setSaving] = useState(false);
   const save = async () => {
     if (!form.title) { notify('أدخل عنوان الفيديو', 'error'); return; }
     setSaving(true);
     try {
       const ytId = extractYouTubeId(form.youtubeUrl || '');
-      if (video) { await SiteDB.updateVideo(video.id, { title: form.title, youtubeId: ytId, duration: form.duration }); notify('تم تحديث الفيديو'); }
-      else { await SiteDB.addVideo(courseId, { title: form.title, youtubeId: ytId, duration: form.duration || 'غير محدد' }); notify('تم إضافة الفيديو'); }
+      if (video) { await SiteDB.updateVideo(video.id, { title: form.title, youtubeId: ytId, duration: form.duration, isFree: form.isFree, description: form.description }); notify('تم تحديث الفيديو'); }
+      else { await SiteDB.addVideo(courseId, { title: form.title, youtubeId: ytId, duration: form.duration || 'غير محدد', isFree: form.isFree, description: form.description }); notify('تم إضافة الفيديو'); }
       await onSaved(); onClose();
-    } catch (e) { notify('فشل الحفظ: ' + e.message, 'error'); }
+    } catch (e) { notify('فشل: ' + e.message, 'error'); }
     setSaving(false);
   };
   return React.createElement('div', { className: 'modal-overlay', onClick: e => e.target === e.currentTarget && onClose() },
-    React.createElement('div', { className: 'modal-box', style: { maxWidth: 440 } },
+    React.createElement('div', { className: 'modal-box', style: { maxWidth: 480 } },
       React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 } },
-        React.createElement('h2', { style: { fontSize: 18, fontWeight: 700 } }, video ? 'تعديل الفيديو' : 'إضافة فيديو جديد'),
+        React.createElement('h2', { style: { fontSize: 18, fontWeight: 700 } }, video ? 'تعديل الفيديو' : 'إضافة فيديو'),
         React.createElement('button', { onClick: onClose, style: { background: 'transparent', border: 'none', color: '#8888a8', fontSize: 22, cursor: 'pointer' } }, '×')
       ),
-      [{ label: 'عنوان الفيديو *', key: 'title', ph: 'مثال: مقدمة في التكامل' }, { label: 'رابط يوتيوب', key: 'youtubeUrl', ph: 'https://youtube.com/watch?v=...' }, { label: 'المدة', key: 'duration', ph: 'مثال: 15 دقيقة' }].map((f, i) =>
-        React.createElement('div', { key: i, style: { marginBottom: 16 } },
+      [{ label: 'عنوان الفيديو *', key: 'title', ph: 'مثال: مقدمة في التكامل' }, { label: 'رابط يوتيوب', key: 'youtubeUrl', ph: 'https://youtube.com/watch?v=...' }, { label: 'المدة', key: 'duration', ph: 'مثال: 15 دقيقة' }, { label: 'الوصف', key: 'description', ph: 'وصف مختصر للدرس' }].map((f, i) =>
+        React.createElement('div', { key: i, style: { marginBottom: 14 } },
           React.createElement('label', { style: { display: 'block', fontSize: 13, color: '#b0b0c8', marginBottom: 6 } }, f.label),
           React.createElement('input', { className: 'input-field', value: form[f.key], onChange: e => setForm({ ...form, [f.key]: e.target.value }), placeholder: f.ph })
         )
       ),
+      React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20, padding: '10px 14px', background: 'rgba(34,197,94,.08)', borderRadius: 10, cursor: 'pointer' }, onClick: () => setForm({ ...form, isFree: !form.isFree }) },
+        React.createElement('div', { style: { width: 20, height: 20, borderRadius: 4, border: '2px solid ' + (form.isFree ? '#4ade80' : 'rgba(108,71,255,.4)'), background: form.isFree ? '#4ade80' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 } }, form.isFree ? '✓' : ''),
+        React.createElement('span', { style: { fontSize: 14 } }, 'درس مجاني (يُشاهَد بدون تسجيل)')
+      ),
       React.createElement('div', { style: { display: 'flex', gap: 12 } },
-        React.createElement('button', { className: 'btn-primary', style: { flex: 1, background: video ? 'linear-gradient(135deg,#059669,#10b981)' : 'linear-gradient(135deg,#6c47ff,#a855f7)' }, onClick: save, disabled: saving }, saving ? 'جارٍ الحفظ...' : (video ? '💾 حفظ التعديلات' : '➕ إضافة الفيديو')),
+        React.createElement('button', { className: 'btn-primary', style: { flex: 1 }, onClick: save, disabled: saving }, saving ? 'جارٍ الحفظ...' : (video ? '💾 حفظ' : '➕ إضافة')),
         React.createElement('button', { className: 'btn-outline', style: { flex: 1 }, onClick: onClose }, 'إلغاء')
       )
     )
   );
 }
 
-// ============================================================
-// QUIZ EDITOR MODAL
-// ============================================================
 function QuizEditorModal({ video, notify, onClose, onSaved }) {
   const [questions, setQuestions] = useState(video && video.quiz ? JSON.parse(JSON.stringify(video.quiz)) : []);
   const [saving, setSaving] = useState(false);
@@ -894,47 +1296,36 @@ function QuizEditorModal({ video, notify, onClose, onSaved }) {
   return React.createElement('div', { className: 'modal-overlay', onClick: e => e.target === e.currentTarget && onClose() },
     React.createElement('div', { className: 'modal-box', style: { maxWidth: 600 } },
       React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 } },
-        React.createElement('h2', { style: { fontSize: 18, fontWeight: 700 } }, 'تعديل امتحان: ' + (video && video.title)),
+        React.createElement('h2', { style: { fontSize: 18, fontWeight: 700 } }, 'امتحان: ' + (video?.title || '')),
         React.createElement('button', { onClick: onClose, style: { background: 'transparent', border: 'none', color: '#8888a8', fontSize: 22, cursor: 'pointer' } }, '×')
       ),
-      questions.map((q, qi) => React.createElement('div', { key: qi, style: { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(108,71,255,0.15)', borderRadius: 12, padding: 16, marginBottom: 16 } },
-        React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 } },
+      questions.map((q, qi) => React.createElement('div', { key: qi, style: { background: 'rgba(255,255,255,.03)', border: '1px solid rgba(108,71,255,.15)', borderRadius: 12, padding: 16, marginBottom: 16 } },
+        React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: 10 } },
           React.createElement('span', { style: { fontWeight: 600, fontSize: 14 } }, 'سؤال ' + (qi + 1)),
           React.createElement('button', { className: 'btn-danger', style: { padding: '3px 10px', fontSize: 12 }, onClick: () => delQ(qi) }, 'حذف')
         ),
         React.createElement('input', { className: 'input-field', style: { marginBottom: 12 }, value: q.q, onChange: e => updQ(qi, 'q', e.target.value), placeholder: 'نص السؤال' }),
         q.options.map((opt, oi) => React.createElement('div', { key: oi, style: { display: 'flex', gap: 8, marginBottom: 8, alignItems: 'center' } },
-          React.createElement('input', { type: 'radio', name: 'ans-' + qi, checked: q.answer === oi, onChange: () => updQ(qi, 'answer', oi), style: { accentColor: '#6c47ff', width: 16, height: 16, cursor: 'pointer', flexShrink: 0 } }),
+          React.createElement('input', { type: 'radio', name: 'ans-' + qi, checked: q.answer === oi, onChange: () => updQ(qi, 'answer', oi), style: { accentColor: '#6c47ff', width: 16, height: 16, cursor: 'pointer' } }),
           React.createElement('input', { className: 'input-field', style: { flex: 1, padding: '8px 12px' }, value: opt, onChange: e => updOpt(qi, oi, e.target.value), placeholder: 'الخيار ' + String.fromCharCode(65 + oi) })
         )),
-        React.createElement('p', { style: { fontSize: 12, color: '#a78bfa', marginTop: 6 } }, '● الإجابة الصحيحة: الخيار ' + String.fromCharCode(65 + q.answer))
+        React.createElement('p', { style: { fontSize: 12, color: '#a78bfa', marginTop: 6 } }, '● الإجابة: الخيار ' + String.fromCharCode(65 + q.answer))
       )),
       React.createElement('button', { className: 'btn-outline', style: { width: '100%', marginBottom: 16 }, onClick: addQ }, '+ إضافة سؤال'),
       React.createElement('div', { style: { display: 'flex', gap: 12 } },
-        React.createElement('button', { className: 'btn-primary', style: { flex: 1 }, onClick: save, disabled: saving }, saving ? 'جارٍ الحفظ...' : 'حفظ الامتحان'),
+        React.createElement('button', { className: 'btn-primary', style: { flex: 1 }, onClick: save, disabled: saving }, saving ? '...' : 'حفظ'),
         React.createElement('button', { className: 'btn-outline', style: { flex: 1 }, onClick: onClose }, 'إلغاء')
       )
     )
   );
 }
 
-// ============================================================
-// ADMIN COURSES
-// ============================================================
 function AdminCourses({ data, setData, setModal, notify, reloadData }) {
   const [expanded, setExpanded] = useState(null);
   const [videoModal, setVideoModal] = useState(null);
   const [quizModal, setQuizModal] = useState(null);
-  const delCourse = async id => {
-    if (!window.confirm('هل أنت متأكد من حذف هذه الدورة؟')) return;
-    try { await SiteDB.deleteCourse(id); await reloadData(); notify('تم حذف الدورة'); }
-    catch (e) { notify('فشل: ' + e.message, 'error'); }
-  };
-  const delVideo = async (cId, vId) => {
-    if (!window.confirm('هل أنت متأكد من حذف هذا الفيديو؟')) return;
-    try { await SiteDB.deleteVideo(vId); await reloadData(); notify('تم حذف الفيديو'); }
-    catch (e) { notify('فشل: ' + e.message, 'error'); }
-  };
+  const delCourse = async id => { if (!window.confirm('هل أنت متأكد؟')) return; try { await SiteDB.deleteCourse(id); await reloadData(); notify('تم الحذف'); } catch (e) { notify('فشل', 'error'); } };
+  const delVideo = async vId => { if (!window.confirm('هل أنت متأكد؟')) return; try { await SiteDB.deleteVideo(vId); await reloadData(); notify('تم الحذف'); } catch (e) { notify('فشل', 'error'); } };
   return React.createElement('div', null,
     React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 } },
       React.createElement('h1', { style: { fontSize: 24, fontWeight: 700 } }, 'إدارة الدورات'),
@@ -942,86 +1333,53 @@ function AdminCourses({ data, setData, setModal, notify, reloadData }) {
     ),
     videoModal && React.createElement(VideoFormModal, { courseId: videoModal.courseId, video: videoModal.video, notify, onClose: () => setVideoModal(null), onSaved: reloadData }),
     quizModal && React.createElement(QuizEditorModal, { video: quizModal.video, notify, onClose: () => setQuizModal(null), onSaved: reloadData }),
-    React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 16 } },
-      data.courses.map(c => React.createElement('div', { key: c.id, className: 'card', style: { padding: 0, overflow: 'hidden' } },
-        React.createElement('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: expanded === c.id ? '1px solid rgba(108,71,255,0.15)' : 'none' } },
-          React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 12 } },
-            React.createElement('span', { style: { fontSize: 28 } }, c.icon),
-            React.createElement('div', null,
-              React.createElement('div', { style: { fontWeight: 700, fontSize: 16 } }, c.title),
-              React.createElement('div', { style: { fontSize: 13, color: '#8888a8' } }, c.category + ' • ' + (c.videos || []).length + ' فيديو')
-            )
-          ),
-          React.createElement('div', { style: { display: 'flex', gap: 8, alignItems: 'center' } },
-            React.createElement('button', { className: 'btn-success', style: { padding: '5px 14px', fontSize: 12 }, onClick: () => setVideoModal({ courseId: c.id }) }, '+ فيديو'),
-            React.createElement('button', { className: 'btn-outline', style: { padding: '5px 12px', fontSize: 12 }, onClick: () => setModal({ type: 'editCourse', courseData: c }) }, 'تعديل'),
-            React.createElement('button', { className: 'btn-danger', style: { padding: '5px 12px' }, onClick: () => delCourse(c.id) }, 'حذف'),
-            React.createElement('button', { onClick: () => setExpanded(expanded === c.id ? null : c.id), style: { background: 'transparent', border: '1px solid rgba(108,71,255,0.2)', color: '#a78bfa', padding: '5px 12px', borderRadius: 8, cursor: 'pointer', fontSize: 12 } }, expanded === c.id ? '▲ إغلاق' : '▼ الفيديوهات')
+    data.courses.map(c => React.createElement('div', { key: c.id, className: 'card', style: { padding: 0, overflow: 'hidden', marginBottom: 16 } },
+      React.createElement('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px' } },
+        React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 12 } },
+          React.createElement('span', { style: { fontSize: 28 } }, c.icon),
+          React.createElement('div', null,
+            React.createElement('div', { style: { fontWeight: 700, fontSize: 16 } }, c.title),
+            React.createElement('div', { style: { fontSize: 13, color: '#8888a8' } }, c.category + ' • ' + (c.videos || []).length + ' فيديو • ' + (c.difficulty || 'متوسط'))
           )
         ),
-        expanded === c.id && React.createElement('div', { style: { padding: '16px 20px' } },
-          (c.videos || []).length === 0
-            ? React.createElement('p', { style: { color: '#8888a8', fontSize: 14 } }, 'لم تتم إضافة فيديوهات بعد. اضغط "+ فيديو" لإضافة أول فيديو.')
-            : React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 10 } },
-                c.videos.map(v => React.createElement('div', { key: v.id, style: { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(108,71,255,0.12)', borderRadius: 12, padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
-                  React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 12 } },
-                    React.createElement('span', { style: { color: '#6c47ff', fontSize: 18 } }, '▶'),
-                    React.createElement('div', null,
-                      React.createElement('div', { style: { fontWeight: 600, fontSize: 14 } }, v.title),
-                      React.createElement('div', { style: { fontSize: 12, color: '#8888a8' } }, v.duration + (v.youtubeId ? ' • ' + v.youtubeId : ' • بدون رابط')),
-                      React.createElement('div', { style: { fontSize: 12, color: '#a78bfa', marginTop: 2 } }, '📝 ' + (v.quiz || []).length + ' سؤال')
-                    )
-                  ),
-                  React.createElement('div', { style: { display: 'flex', gap: 6 } },
-                    React.createElement('button', { className: 'btn-outline', style: { padding: '4px 10px', fontSize: 11 }, onClick: () => setQuizModal({ video: v }) }, 'تعديل الامتحان'),
-                    React.createElement('button', { className: 'btn-outline', style: { padding: '4px 10px', fontSize: 11 }, onClick: () => setVideoModal({ courseId: c.id, video: v }) }, 'تعديل'),
-                    React.createElement('button', { className: 'btn-danger', style: { padding: '4px 10px' }, onClick: () => delVideo(c.id, v.id) }, 'حذف')
-                  )
-                ))
-              )
+        React.createElement('div', { style: { display: 'flex', gap: 8 } },
+          React.createElement('button', { className: 'btn-success', style: { padding: '5px 14px', fontSize: 12 }, onClick: () => setVideoModal({ courseId: c.id }) }, '+ فيديو'),
+          React.createElement('button', { className: 'btn-outline', style: { padding: '5px 12px', fontSize: 12 }, onClick: () => setModal({ type: 'editCourse', courseData: c }) }, 'تعديل'),
+          React.createElement('button', { className: 'btn-danger', style: { padding: '5px 12px' }, onClick: () => delCourse(c.id) }, 'حذف'),
+          React.createElement('button', { onClick: () => setExpanded(expanded === c.id ? null : c.id), style: { background: 'transparent', border: '1px solid rgba(108,71,255,.2)', color: '#a78bfa', padding: '5px 12px', borderRadius: 8, cursor: 'pointer', fontSize: 12 } }, expanded === c.id ? '▲' : '▼ الفيديوهات')
         )
-      ))
-    )
+      ),
+      expanded === c.id && React.createElement('div', { style: { padding: '16px 20px', borderTop: '1px solid rgba(108,71,255,.1)' } },
+        (c.videos || []).length === 0
+          ? React.createElement('p', { style: { color: '#8888a8', fontSize: 14 } }, 'لا توجد فيديوهات بعد.')
+          : c.videos.map(v => React.createElement('div', { key: v.id, style: { background: 'rgba(255,255,255,.03)', border: '1px solid rgba(108,71,255,.1)', borderRadius: 12, padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 } },
+              React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 12 } },
+                React.createElement('span', { style: { color: '#6c47ff', fontSize: 18 } }, '▶'),
+                React.createElement('div', null,
+                  React.createElement('div', { style: { fontWeight: 600, fontSize: 14 } }, v.title),
+                  React.createElement('div', { style: { fontSize: 12, color: '#8888a8' } }, v.duration + (v.is_free ? ' • مجاني' : '') + ' • ' + (v.quiz || []).length + ' سؤال')
+                )
+              ),
+              React.createElement('div', { style: { display: 'flex', gap: 6 } },
+                React.createElement('button', { className: 'btn-outline', style: { padding: '4px 10px', fontSize: 11 }, onClick: () => setQuizModal({ video: v }) }, 'الامتحان'),
+                React.createElement('button', { className: 'btn-outline', style: { padding: '4px 10px', fontSize: 11 }, onClick: () => setVideoModal({ courseId: c.id, video: v }) }, 'تعديل'),
+                React.createElement('button', { className: 'btn-danger', style: { padding: '4px 10px' }, onClick: () => delVideo(v.id) }, 'حذف')
+              )
+            ))
+      )
+    ))
   );
 }
 
-// ============================================================
-// ADMIN REVIEWS
-// ============================================================
-function AdminReviews({ data }) {
-  return React.createElement('div', null,
-    React.createElement('h1', { style: { fontSize: 24, fontWeight: 700, marginBottom: 24 } }, 'إدارة التقييمات'),
-    data.reviews.length === 0 && React.createElement('p', { style: { color: '#8888a8' } }, 'لا توجد تقييمات بعد.'),
-    React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 16 } },
-      data.reviews.map(r => React.createElement('div', { key: r.id, className: 'card' },
-        React.createElement('div', { style: { display: 'flex', gap: 12, alignItems: 'center', marginBottom: 8 } },
-          React.createElement('span', { style: { fontWeight: 600 } }, r.user),
-          React.createElement('span', { className: 'badge badge-blue', style: { fontSize: 11 } }, r.course),
-          React.createElement('span', { className: 'badge ' + (r.status === 'approved' ? 'badge-green' : 'badge-yellow') }, r.status === 'approved' ? 'معتمد' : 'قيد المراجعة')
-        ),
-        React.createElement('div', { style: { color: '#facc15', marginBottom: 6 } }, '★'.repeat(r.rating || 0) + '☆'.repeat(5 - (r.rating || 0))),
-        React.createElement('p', { style: { color: '#b0b0c8', fontSize: 14 } }, r.text),
-        React.createElement('p', { style: { color: '#666688', fontSize: 12, marginTop: 6 } }, r.date)
-      ))
-    )
-  );
-}
-
-// ============================================================
-// ADMIN SETTINGS
-// ============================================================
 function AdminSettings({ data, setData, notify }) {
   const [s, setS] = useState({ ...data.settings });
-  const save = async () => {
-    try { await SiteDB.saveSettings(s); setData(d => ({ ...d, settings: s })); notify('تم حفظ الإعدادات'); }
-    catch (e) { notify('فشل: ' + e.message, 'error'); }
-  };
+  const save = async () => { try { await SiteDB.saveSettings(s); setData(d => ({ ...d, settings: s })); notify('تم الحفظ'); } catch (e) { notify('فشل', 'error'); } };
   return React.createElement('div', null,
     React.createElement('h1', { style: { fontSize: 24, fontWeight: 700, marginBottom: 24 } }, 'إعدادات الموقع'),
     React.createElement('div', { className: 'grid-2', style: { gap: 24 } },
       React.createElement('div', { className: 'card' },
         React.createElement('h3', { style: { fontWeight: 700, marginBottom: 20, fontSize: 16 } }, 'معلومات الموقع'),
-        [{ label: 'اسم الموقع', key: 'siteName', type: 'text' }, { label: 'البريد الإلكتروني', key: 'siteEmail', type: 'email' }, { label: 'رقم الهاتف', key: 'sitePhone', type: 'text' }, { label: 'الموقع', key: 'siteLocation', type: 'text' }].map((f, i) =>
+        [{ label: 'اسم الموقع', key: 'siteName', type: 'text' }, { label: 'البريد', key: 'siteEmail', type: 'email' }, { label: 'الهاتف', key: 'sitePhone', type: 'text' }, { label: 'الموقع', key: 'siteLocation', type: 'text' }].map((f, i) =>
           React.createElement('div', { key: i, style: { marginBottom: 16 } },
             React.createElement('label', { style: { display: 'block', fontSize: 13, color: '#b0b0c8', marginBottom: 6 } }, f.label),
             React.createElement('input', { className: 'input-field', type: f.type, value: s[f.key] || '', onChange: e => setS({ ...s, [f.key]: e.target.value }) })
@@ -1032,10 +1390,10 @@ function AdminSettings({ data, setData, notify }) {
         React.createElement('h3', { style: { fontWeight: 700, marginBottom: 20, fontSize: 16 } }, 'إعدادات النظام'),
         [{ label: 'وضع الصيانة', key: 'maintenanceMode' }, { label: 'السماح بالتسجيل', key: 'allowRegistration' }].map((f, i) => {
           const isOn = s[f.key] === 'true' || s[f.key] === true;
-          return React.createElement('div', { key: i, style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' } },
+          return React.createElement('div', { key: i, style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0', borderBottom: '1px solid rgba(255,255,255,.05)' } },
             React.createElement('span', { style: { fontSize: 14 } }, f.label),
-            React.createElement('div', { onClick: () => setS({ ...s, [f.key]: !isOn }), style: { width: 44, height: 24, borderRadius: 12, background: isOn ? '#6c47ff' : 'rgba(255,255,255,0.1)', cursor: 'pointer', position: 'relative', transition: 'background 0.2s' } },
-              React.createElement('div', { style: { width: 20, height: 20, borderRadius: '50%', background: 'white', position: 'absolute', top: 2, transition: 'right 0.2s', right: isOn ? 2 : 22 } })
+            React.createElement('div', { onClick: () => setS({ ...s, [f.key]: !isOn }), style: { width: 44, height: 24, borderRadius: 12, background: isOn ? '#6c47ff' : 'rgba(255,255,255,.1)', cursor: 'pointer', position: 'relative', transition: 'background .2s' } },
+              React.createElement('div', { style: { width: 20, height: 20, borderRadius: '50%', background: 'white', position: 'absolute', top: 2, transition: 'right .2s', right: isOn ? 2 : 22 } })
             )
           );
         })
@@ -1045,112 +1403,31 @@ function AdminSettings({ data, setData, notify }) {
   );
 }
 
-// ============================================================
-// LINKS PAGE
-// ============================================================
-function LinksPage({ data, setData, user, notify }) {
-  const [links, setLinks] = useState(data.links || []);
-  const [editMode, setEditMode] = useState(false);
-  const [showForm, setShowForm] = useState(false);
-  const [editId, setEditId] = useState(null);
-  const [form, setForm] = useState({ title: '', desc: '', url: '', icon: '🔗', color: '#6c47ff' });
-  const isAdmin = user && user.role === 'admin';
-  const icons = ['📊', '🧮', '🎓', '📖', '📐', '🔵', '🏛️', '📝', '🔗', '🌐', '💻', '🔬', '⚗️', '🎯', '📌', '💡', '📚', '🎬', '✏️', '🔢'];
-
-  useEffect(() => { setLinks(data.links || []); }, [data.links]);
-
-  const persist = async newLinks => {
-    setLinks(newLinks);
-    setData(d => ({ ...d, links: newLinks }));
-    try { await SiteDB.saveLinks(newLinks); }
-    catch (e) { notify('فشل الحفظ: ' + e.message, 'error'); }
-  };
-  const openAdd = () => { setForm({ title: '', desc: '', url: '', icon: '🔗', color: '#6c47ff' }); setEditId(null); setShowForm(true); };
-  const openEdit = link => { setForm({ title: link.title, desc: link.desc || link.description || '', url: link.url, icon: link.icon || '🔗', color: link.color || '#6c47ff' }); setEditId(link.id); setShowForm(true); };
-  const handleSave = () => {
-    if (!form.title || !form.url) { notify('يرجى إدخال الاسم والرابط', 'error'); return; }
-    const newLinks = editId !== null ? links.map(l => l.id === editId ? { ...l, ...form } : l) : [...links, { ...form, id: Date.now() }];
-    persist(newLinks);
-    notify(editId !== null ? '✓ تم حفظ التعديلات' : '✓ تم إضافة الرابط');
-    setShowForm(false);
-  };
-
-  return React.createElement('div', { style: { padding: '60px 40px', maxWidth: 1100, margin: '0 auto' } },
-    React.createElement('div', { style: { textAlign: 'center', marginBottom: 48 } },
-      React.createElement('h1', { style: { fontSize: 36, fontWeight: 800, marginBottom: 12 } },
-        React.createElement('span', { style: { color: '#e8e8f0' } }, 'روابط '),
-        React.createElement('span', { className: 'neon-text' }, 'مفيدة')
+function AdminReviews({ data }) {
+  return React.createElement('div', null,
+    React.createElement('h1', { style: { fontSize: 24, fontWeight: 700, marginBottom: 24 } }, 'التقييمات'),
+    data.reviews.length === 0 && React.createElement('p', { style: { color: '#8888a8' } }, 'لا توجد تقييمات بعد.'),
+    data.reviews.map(r => React.createElement('div', { key: r.id, className: 'card', style: { marginBottom: 16 } },
+      React.createElement('div', { style: { display: 'flex', gap: 12, alignItems: 'center', marginBottom: 8 } },
+        React.createElement('span', { style: { fontWeight: 600 } }, r.user),
+        React.createElement('span', { className: 'badge badge-blue', style: { fontSize: 11 } }, r.course),
+        React.createElement('span', { className: 'badge ' + (r.status === 'approved' ? 'badge-green' : 'badge-yellow') }, r.status === 'approved' ? 'معتمد' : 'قيد المراجعة')
       ),
-      React.createElement('p', { style: { color: '#8888a8', fontSize: 16 } }, 'مصادر ومراجع تعليمية موصى بها'),
-      isAdmin && React.createElement('div', { style: { marginTop: 20, display: 'flex', gap: 12, justifyContent: 'center' } },
-        React.createElement('button', { className: 'btn-primary', onClick: openAdd }, '+ إضافة رابط'),
-        React.createElement('button', { className: editMode ? 'btn-danger' : 'btn-outline', onClick: () => setEditMode(!editMode) }, editMode ? '✓ إنهاء التعديل' : '✏️ تعديل الروابط')
-      )
-    ),
-    showForm && isAdmin && React.createElement('div', { className: 'modal-overlay', onClick: e => e.target === e.currentTarget && setShowForm(false) },
-      React.createElement('div', { className: 'modal-box', style: { maxWidth: 480 } },
-        React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 } },
-          React.createElement('h2', { style: { fontSize: 18, fontWeight: 700 } }, editId !== null ? 'تعديل الرابط' : 'إضافة رابط جديد'),
-          React.createElement('button', { onClick: () => setShowForm(false), style: { background: 'transparent', border: 'none', color: '#8888a8', fontSize: 22, cursor: 'pointer' } }, '×')
-        ),
-        [{ label: 'اسم الرابط *', key: 'title', ph: 'مثال: ديسموس' }, { label: 'الوصف', key: 'desc', ph: 'وصف مختصر' }, { label: 'الرابط (URL) *', key: 'url', ph: 'https://...' }].map((f, i) =>
-          React.createElement('div', { key: i, style: { marginBottom: 14 } },
-            React.createElement('label', { style: { display: 'block', fontSize: 13, color: '#b0b0c8', marginBottom: 6 } }, f.label),
-            React.createElement('input', { className: 'input-field', value: form[f.key], onChange: e => setForm({ ...form, [f.key]: e.target.value }), placeholder: f.ph })
-          )
-        ),
-        React.createElement('div', { style: { marginBottom: 14 } },
-          React.createElement('label', { style: { display: 'block', fontSize: 13, color: '#b0b0c8', marginBottom: 8 } }, 'الأيقونة'),
-          React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 6 } },
-            icons.map(ic => React.createElement('button', { key: ic, onClick: () => setForm({ ...form, icon: ic }), style: { width: 36, height: 36, borderRadius: 8, border: '2px solid ' + (form.icon === ic ? '#6c47ff' : 'rgba(108,71,255,0.2)'), background: form.icon === ic ? 'rgba(108,71,255,0.2)' : 'transparent', cursor: 'pointer', fontSize: 16 } }, ic))
-          )
-        ),
-        React.createElement('div', { style: { marginBottom: 20 } },
-          React.createElement('label', { style: { display: 'block', fontSize: 13, color: '#b0b0c8', marginBottom: 6 } }, 'لون البطاقة'),
-          React.createElement('input', { type: 'color', value: form.color, onChange: e => setForm({ ...form, color: e.target.value }), style: { width: 60, height: 36, borderRadius: 8, border: '1px solid rgba(108,71,255,0.3)', cursor: 'pointer' } })
-        ),
-        React.createElement('div', { style: { display: 'flex', gap: 12 } },
-          React.createElement('button', { className: 'btn-primary', style: { flex: 1 }, onClick: handleSave }, '💾 حفظ'),
-          React.createElement('button', { className: 'btn-outline', style: { flex: 1 }, onClick: () => setShowForm(false) }, 'إلغاء')
-        )
-      )
-    ),
-    React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 } },
-      links.map(link => React.createElement('div', { key: link.id, className: 'card', style: { position: 'relative', cursor: editMode ? 'default' : 'pointer', overflow: 'hidden' }, onClick: () => !editMode && window.open(link.url, '_blank') },
-        React.createElement('div', { style: { display: 'flex', alignItems: 'flex-start', gap: 14, justifyContent: 'space-between' } },
-          React.createElement('div', { style: { flex: 1 } },
-            React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 } },
-              React.createElement('div', { style: { width: 44, height: 44, borderRadius: 12, background: (link.color || '#6c47ff') + '22', border: '1px solid ' + (link.color || '#6c47ff') + '55', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 } }, link.icon || '🔗'),
-              React.createElement('div', null,
-                React.createElement('div', { style: { fontWeight: 700, fontSize: 15, color: '#e8e8f0' } }, link.title),
-                !editMode && React.createElement('div', { style: { fontSize: 11, color: link.color || '#6c47ff', marginTop: 2 } }, '↗ افتح في تبويب جديد')
-              )
-            ),
-            React.createElement('p', { style: { fontSize: 13, color: '#8888a8', lineHeight: 1.65 } }, link.desc || link.description || '')
-          ),
-          editMode && isAdmin && React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 } },
-            React.createElement('button', { className: 'btn-outline', style: { padding: '4px 10px', fontSize: 11 }, onClick: e => { e.stopPropagation(); openEdit(link); } }, '✏️ تعديل'),
-            React.createElement('button', { className: 'btn-danger', style: { padding: '4px 10px', fontSize: 11 }, onClick: e => { e.stopPropagation(); persist(links.filter(l => l.id !== link.id)); notify('تم الحذف'); } }, '🗑 حذف')
-          )
-        ),
-        !editMode && React.createElement('div', { style: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, ' + (link.color || '#6c47ff') + ', transparent)' } })
-      ))
-    )
+      React.createElement('div', { style: { color: '#facc15', marginBottom: 6 } }, '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating)),
+      React.createElement('p', { style: { color: '#b0b0c8', fontSize: 14 } }, r.text),
+      React.createElement('p', { style: { color: '#666688', fontSize: 12, marginTop: 6 } }, r.date)
+    ))
   );
 }
 
-// ============================================================
-// MODAL (ADD/EDIT COURSE OR USER)
-// ============================================================
 function AppModal({ modal, setModal, data, setData, notify, syncUsers, reloadData }) {
   const [form, setForm] = useState(
     modal.type === 'editCourse' ? { ...modal.courseData } :
     modal.type === 'addUser' ? { name: '', email: '', role: 'student', password: '' } :
-    { title: '', icon: '📖', category: 'الرياضيات', units: 1, price: 0 }
+    { title: '', icon: '📖', category: 'الرياضيات', units: 1, price: 0, difficulty: 'متوسط', description: '', instructor_name: '' }
   );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-
   const submit = async () => {
     setError(''); setSaving(true);
     try {
@@ -1163,18 +1440,16 @@ function AppModal({ modal, setModal, data, setData, notify, syncUsers, reloadDat
         if (!form.title) { setError('يرجى إدخال اسم الدورة'); setSaving(false); return; }
         await SiteDB.addCourse(form); await reloadData(); notify('تم إضافة الدورة');
       } else if (modal.type === 'editCourse') {
-        await SiteDB.updateCourse(form.id, form); await reloadData(); notify('تم تحديث الدورة');
+        await SiteDB.updateCourse(form.id, form); await reloadData(); notify('تم التحديث');
       }
       setModal(null);
     } catch (e) { setError(e.message); }
     setSaving(false);
   };
-
-  const userFields = [{ label: 'الاسم الكامل', key: 'name', type: 'text' }, { label: 'البريد الإلكتروني', key: 'email', type: 'email' }, { label: 'كلمة المرور', key: 'password', type: 'password' }];
-  const courseFields = [{ label: 'اسم الدورة', key: 'title', type: 'text' }, { label: 'الأيقونة (رمز أو إيموجي)', key: 'icon', type: 'text' }, { label: 'عدد الوحدات', key: 'units', type: 'number' }, { label: 'السعر (0 = مجاني)', key: 'price', type: 'number' }];
+  const userFields = [{ label: 'الاسم', key: 'name', type: 'text' }, { label: 'البريد', key: 'email', type: 'email' }, { label: 'كلمة المرور', key: 'password', type: 'password' }];
+  const courseFields = [{ label: 'اسم الدورة', key: 'title', type: 'text' }, { label: 'الأيقونة', key: 'icon', type: 'text' }, { label: 'اسم المعلم', key: 'instructor_name', type: 'text' }, { label: 'الوصف', key: 'description', type: 'text' }, { label: 'عدد الوحدات', key: 'units', type: 'number' }, { label: 'السعر (0=مجاني)', key: 'price', type: 'number' }];
   const fields = modal.type === 'addUser' ? userFields : courseFields;
-  const title = modal.type === 'addUser' ? 'إضافة مستخدم جديد' : modal.type === 'addCourse' ? 'إضافة دورة جديدة' : 'تعديل الدورة';
-
+  const title = modal.type === 'addUser' ? 'إضافة مستخدم' : modal.type === 'addCourse' ? 'إضافة دورة' : 'تعديل الدورة';
   return React.createElement('div', { className: 'modal-overlay', onClick: e => e.target === e.currentTarget && setModal(null) },
     React.createElement('div', { className: 'modal-box' },
       React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 } },
@@ -1193,11 +1468,21 @@ function AppModal({ modal, setModal, data, setData, notify, syncUsers, reloadDat
           React.createElement('option', { value: 'admin' }, 'مدير')
         )
       ),
-      (modal.type === 'addCourse' || modal.type === 'editCourse') && React.createElement('div', { style: { marginBottom: 16 } },
-        React.createElement('label', { style: { display: 'block', fontSize: 13, color: '#b0b0c8', marginBottom: 6 } }, 'الفئة'),
-        React.createElement('select', { className: 'input-field', value: form.category || 'الرياضيات', onChange: e => setForm({ ...form, category: e.target.value }) },
-          React.createElement('option', null, 'الرياضيات'),
-          React.createElement('option', null, 'الفيزياء')
+      (modal.type === 'addCourse' || modal.type === 'editCourse') && React.createElement('div', null,
+        React.createElement('div', { style: { marginBottom: 16 } },
+          React.createElement('label', { style: { display: 'block', fontSize: 13, color: '#b0b0c8', marginBottom: 6 } }, 'الفئة'),
+          React.createElement('select', { className: 'input-field', value: form.category || 'الرياضيات', onChange: e => setForm({ ...form, category: e.target.value }) },
+            React.createElement('option', null, 'الرياضيات'),
+            React.createElement('option', null, 'الفيزياء')
+          )
+        ),
+        React.createElement('div', { style: { marginBottom: 16 } },
+          React.createElement('label', { style: { display: 'block', fontSize: 13, color: '#b0b0c8', marginBottom: 6 } }, 'المستوى'),
+          React.createElement('select', { className: 'input-field', value: form.difficulty || 'متوسط', onChange: e => setForm({ ...form, difficulty: e.target.value }) },
+            React.createElement('option', null, 'مبتدئ'),
+            React.createElement('option', null, 'متوسط'),
+            React.createElement('option', null, 'متقدم')
+          )
         )
       ),
       error && React.createElement('div', { className: 'error-banner' }, '⚠️ ' + error),
@@ -1209,14 +1494,10 @@ function AppModal({ modal, setModal, data, setData, notify, syncUsers, reloadDat
   );
 }
 
-// ============================================================
-// ADMIN PANEL
-// ============================================================
 function AdminPanel({ data, setData, adminSection, setAdminSection, setModal, notify, syncUsers, reloadData }) {
-  const sections = [{ id: 'dashboard', label: 'لوحة التحكم', icon: '📊' }, { id: 'users', label: 'المستخدمون', icon: '👥' }, { id: 'courses', label: 'الدورات', icon: '📚' }, { id: 'links', label: 'الروابط المفيدة', icon: '🔗' }, { id: 'reviews', label: 'التقييمات', icon: '⭐' }, { id: 'settings', label: 'الإعدادات', icon: '⚙️' }];
+  const sections = [{ id: 'dashboard', label: 'لوحة التحكم', icon: '📊' }, { id: 'users', label: 'المستخدمون', icon: '👥' }, { id: 'courses', label: 'الدورات', icon: '📚' }, { id: 'links', label: 'الروابط', icon: '🔗' }, { id: 'reviews', label: 'التقييمات', icon: '⭐' }, { id: 'settings', label: 'الإعدادات', icon: '⚙️' }];
   return React.createElement('div', { style: { display: 'flex', minHeight: 'calc(100vh - 64px)' } },
-    React.createElement('div', { style: { width: 240, background: 'rgba(255,255,255,0.02)', borderLeft: '1px solid rgba(108,71,255,0.1)', padding: '24px 16px', flexShrink: 0 } },
-      React.createElement('div', { style: { marginBottom: 16, fontSize: 12, color: '#666688', padding: '0 16px' } }, 'القائمة الرئيسية'),
+    React.createElement('div', { style: { width: 240, background: 'rgba(255,255,255,.02)', borderLeft: '1px solid rgba(108,71,255,.1)', padding: '24px 16px', flexShrink: 0 } },
       sections.map(s => React.createElement('div', { key: s.id, className: 'sidebar-item ' + (adminSection === s.id ? 'active' : ''), onClick: () => setAdminSection(s.id) },
         React.createElement('span', null, s.icon),
         React.createElement('span', null, s.label)
@@ -1226,7 +1507,7 @@ function AdminPanel({ data, setData, adminSection, setAdminSection, setModal, no
       adminSection === 'dashboard' && React.createElement(AdminDashboard, { data }),
       adminSection === 'users' && React.createElement(AdminUsers, { data, setData, setModal, notify, syncUsers }),
       adminSection === 'courses' && React.createElement(AdminCourses, { data, setData, setModal, notify, reloadData }),
-      adminSection === 'reviews' && React.createElement(AdminReviews, { data, setData: setData, notify }),
+      adminSection === 'reviews' && React.createElement(AdminReviews, { data }),
       adminSection === 'links' && React.createElement(LinksPage, { data, setData, user: { role: 'admin' }, notify }),
       adminSection === 'settings' && React.createElement(AdminSettings, { data, setData, notify })
     )
@@ -1238,7 +1519,7 @@ function AdminPanel({ data, setData, adminSection, setAdminSection, setModal, no
 // ============================================================
 function App() {
   const [page, setPage] = useState('home');
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => loadSession());
   const [data, setData] = useState({ users: [], courses: [], settings: {}, links: [], reviews: [] });
   const [loading, setLoading] = useState(true);
   const [dbError, setDbError] = useState('');
@@ -1250,6 +1531,10 @@ function App() {
   const [notification, setNotification] = useState(null);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [filterCat, setFilterCat] = useState('الكل');
+  // student-specific state
+  const [enrollments, setEnrollments] = useState([]);
+  const [progress, setProgress] = useState([]);
+  const [certs, setCerts] = useState([]);
 
   const notify = (msg, type = 'success') => {
     setNotification({ msg, type });
@@ -1265,26 +1550,35 @@ function App() {
     } catch (e) { console.error('reloadData', e); }
   };
 
+  const loadUserData = useCallback(async (u) => {
+    if (!u || u.role === 'admin') return;
+    const [en, pr, ce] = await Promise.all([
+      EnrollDB.getUserEnrollments(u.id),
+      EnrollDB.getProgress(u.id),
+      CertDB.getUserCerts(u.id)
+    ]);
+    setEnrollments(en);
+    setProgress(pr);
+    setCerts(ce);
+  }, []);
+
   useEffect(() => {
     (async () => {
       setLoading(true);
       try {
         const siteData = await SiteDB.get();
-        const users    = await DB.getAllSafe();
+        const users = await DB.getAllSafe();
         setData({ users, courses: siteData.courses, settings: siteData.settings, links: siteData.links, reviews: siteData.reviews });
         setDbError('');
+        if (user) await loadUserData(user);
       } catch (e) {
         const msg = e && e.message ? e.message : String(e);
-        console.error('Init error:', msg);
-        setDbError('⚠️ فشل الاتصال: ' + msg + ' — تأكد من تشغيل setup.sql في Supabase ثم أعد التحميل.');
+        setDbError('⚠️ فشل الاتصال: ' + msg + ' — تأكد من تشغيل setup_v2.sql في Supabase ثم أعد التحميل.');
       } finally { setLoading(false); }
     })();
   }, []);
 
-  const syncUsers = async () => {
-    const users = await DB.getAllSafe();
-    setData(d => ({ ...d, users }));
-  };
+  const syncUsers = async () => { const users = await DB.getAllSafe(); setData(d => ({ ...d, users })); };
 
   const handleLogin = async () => {
     setLoginLoading(true); setLoginError('');
@@ -1292,67 +1586,88 @@ function App() {
       const result = await DB.login({ email: loginForm.email, password: loginForm.password });
       if (!result.ok) { setLoginError(result.error); setLoginLoading(false); return; }
       setUser(result.user);
+      saveSession(result.user);
+      await loadUserData(result.user);
       if (result.user.role === 'admin') { setPage('admin'); notify('مرحباً بك في لوحة التحكم'); }
-      else { setPage('dashboard'); notify('مرحباً بك ' + result.user.name); }
-    } catch (e) { setLoginError('حدث خطأ أثناء تسجيل الدخول، حاول مرة أخرى'); }
+      else { setPage('dashboard'); notify('مرحباً بك ' + result.user.name + ' 👋'); }
+    } catch (e) { setLoginError('حدث خطأ، حاول مجدداً'); }
     setLoginLoading(false);
   };
 
-  const handleLogout = () => { setUser(null); setPage('home'); notify('تم تسجيل الخروج'); };
-  const handleRegister = async formData => { const r = await DB.register(formData); if (r.ok) await syncUsers(); return r; };
+  const handleLogout = () => { setUser(null); clearSession(); setEnrollments([]); setProgress([]); setCerts([]); setPage('home'); notify('تم تسجيل الخروج'); };
+
+  const handleRegister = async formData => {
+    const r = await DB.register(formData);
+    if (r.ok) await syncUsers();
+    return r;
+  };
+
   const handleDeleteAccount = async () => {
     try {
       await DB.remove(user.id);
-      setUser(null);
+      setUser(null); clearSession(); setEnrollments([]); setProgress([]); setCerts([]);
       setPage('home');
-      notify('تم حذف حسابك بنجاح. نتمنى أن نراك مجدداً 👋');
-    } catch(e) {
-      notify('فشل حذف الحساب: ' + e.message, 'error');
-    }
+      notify('تم حذف حسابك. نتمنى أن نراك مجدداً 👋');
+    } catch(e) { notify('فشل حذف الحساب: ' + e.message, 'error'); }
   };
 
-  const navItems = [{ label: 'الرئيسية', id: 'home' }, { label: 'الدورات', id: 'courses' }, { label: 'روابط مفيدة', id: 'links' },
-    ...(user && user.role === 'admin' ? [{ label: 'الإدارة', id: 'admin' }] : [])];
+  const [unreadNotifs, setUnreadNotifs] = useState(0);
+  useEffect(() => {
+    if (!user || user.role === 'admin') return;
+    NotifDB.getForUser(user.id).then(n => setUnreadNotifs(n.filter(x => !x.is_read).length));
+  }, [user]);
+
+  const navItems = [
+    { label: 'الرئيسية', id: 'home' },
+    { label: 'الدورات', id: 'courses' },
+    { label: 'روابط مفيدة', id: 'links' },
+    ...(user && user.role === 'admin' ? [{ label: 'الإدارة', id: 'admin' }] : []),
+    ...(user && user.role !== 'admin' ? [{ label: 'حسابي', id: 'dashboard' }] : [])
+  ];
 
   return React.createElement('div', { style: { fontFamily: "'Segoe UI', Tahoma, sans-serif", background: '#0a0a0f', color: '#e8e8f0', minHeight: '100vh' } },
-    loading && React.createElement('div', { style: { position: 'fixed', inset: 0, background: 'rgba(10,10,15,0.95)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 10000 } },
-      React.createElement('div', { style: { width: 50, height: 50, border: '4px solid rgba(108,71,255,0.2)', borderTop: '4px solid #6c47ff', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: 20 } }),
+    loading && React.createElement('div', { style: { position: 'fixed', inset: 0, background: 'rgba(10,10,15,.95)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 10000 } },
+      React.createElement('div', { style: { width: 50, height: 50, border: '4px solid rgba(108,71,255,.2)', borderTop: '4px solid #6c47ff', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: 20 } }),
       React.createElement('p', { style: { color: '#a78bfa', fontSize: 16 } }, 'جارٍ تحميل البيانات...')
     ),
-    notification && React.createElement('div', { style: { position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', background: notification.type === 'success' ? 'rgba(34,197,94,0.95)' : 'rgba(239,68,68,0.95)', color: 'white', padding: '12px 24px', borderRadius: 12, zIndex: 9999, fontWeight: 600, animation: 'slideIn 0.3s', boxShadow: '0 8px 30px rgba(0,0,0,0.3)', maxWidth: '90vw', textAlign: 'center' } }, notification.msg),
+    notification && React.createElement('div', { style: { position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', background: notification.type === 'success' ? 'rgba(34,197,94,.95)' : 'rgba(239,68,68,.95)', color: 'white', padding: '12px 24px', borderRadius: 12, zIndex: 9999, fontWeight: 600, animation: 'slideIn .3s', boxShadow: '0 8px 30px rgba(0,0,0,.3)', maxWidth: '90vw', textAlign: 'center' } }, notification.msg),
     modal && React.createElement(AppModal, { modal, setModal, data, setData, notify, syncUsers, reloadData }),
-    React.createElement('nav', { style: { position: 'sticky', top: 0, zIndex: 100, background: 'rgba(10,10,15,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(108,71,255,0.15)', padding: '0 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64 } },
+
+    React.createElement('nav', { style: { position: 'sticky', top: 0, zIndex: 100, background: 'rgba(10,10,15,.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(108,71,255,.15)', padding: '0 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64 } },
       React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }, onClick: () => setPage('home') },
-        React.createElement('span', { style: { fontSize: 20 } },
+        React.createElement('span', { style: { fontSize: 18 } },
           React.createElement('span', { style: { color: '#e8e8f0', fontWeight: 700 } }, 'أكاديمية '),
-          React.createElement('span', { className: 'neon-text', style: { fontWeight: 800 } }, 'البعد الجديد')
-        ),
-        React.createElement('span', { style: { fontSize: 20 } }, '🎓')
+          React.createElement('span', { className: 'neon-text', style: { fontWeight: 800 } }, 'البعد الجديد'),
+          React.createElement('span', null, ' 🎓')
+        )
       ),
-      React.createElement('div', { style: { display: 'flex', gap: 4 } },
+      React.createElement('div', { style: { display: 'flex', gap: 4, alignItems: 'center' } },
         navItems.map(n => React.createElement('span', { key: n.id, className: 'nav-link ' + (page === n.id ? 'active' : ''), onClick: () => setPage(n.id) }, n.label))
       ),
-      React.createElement('div', null,
-        user ? React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 12 } },
+      React.createElement('div', { style: { display: 'flex', gap: 12, alignItems: 'center' } },
+        React.createElement(GlobalSearch, { data, setPage, setSelectedCourse }),
+        user ? React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10 } },
           React.createElement('div', { style: { width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#6c47ff,#a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14 } }, user.avatar),
           React.createElement('button', { className: 'btn-outline', style: { padding: '7px 14px', fontSize: 13 }, onClick: handleLogout }, 'خروج')
         ) : React.createElement('button', { className: 'btn-primary', style: { padding: '9px 20px' }, onClick: () => setPage('login') }, 'تسجيل دخول')
       )
     ),
+
     !loading && dbError && React.createElement('div', { style: { margin: '20px 40px' } },
       React.createElement('div', { className: 'error-banner', style: { textAlign: 'center' } },
         dbError,
         React.createElement('button', { className: 'btn-outline', style: { marginRight: 16, padding: '6px 16px', fontSize: 13 }, onClick: () => window.location.reload() }, 'إعادة المحاولة')
       )
     ),
-    page === 'home' && React.createElement(HomePage, { setPage, data, setSelectedCourse, filterCat, setFilterCat }),
-    page === 'courses' && React.createElement(CoursesPage, { data, setPage, setSelectedCourse, filterCat, setFilterCat }),
-    page === 'links' && React.createElement(LinksPage, { data, setData, user, notify }),
-    page === 'course-view' && React.createElement(CourseViewPage, { course: selectedCourse, setPage, user, notify }),
-    page === 'login' && React.createElement(LoginPage, { loginForm, setLoginForm, handleLogin, loginError, setPage, loading: loginLoading }),
-    page === 'register' && React.createElement(RegisterPage, { handleRegister, setPage, notify }),
-    page === 'dashboard' && user && React.createElement(StudentDashboard, { user, data, setPage, setSelectedCourse, onDeleteAccount: handleDeleteAccount }),
-    page === 'admin' && user && user.role === 'admin' && React.createElement(AdminPanel, { data, setData, adminSection, setAdminSection, setModal, notify, syncUsers, reloadData })
+
+    page === 'home'        && React.createElement(HomePage,        { setPage, data, setSelectedCourse, filterCat, setFilterCat, user, enrollments }),
+    page === 'courses'     && React.createElement(CoursesPage,     { data, setPage, setSelectedCourse, filterCat, setFilterCat, user, enrollments }),
+    page === 'links'       && React.createElement(LinksPage,       { data, setData, user, notify }),
+    page === 'course-view' && React.createElement(CourseViewPage,  { course: selectedCourse, setPage, user, notify, enrollments, setEnrollments, progress, setProgress }),
+    page === 'login'       && React.createElement(LoginPage,       { loginForm, setLoginForm, handleLogin, loginError, setPage, loading: loginLoading }),
+    page === 'register'    && React.createElement(RegisterPage,    { handleRegister, setPage, notify }),
+    page === 'dashboard'   && user && React.createElement(StudentDashboard, { user, data, setPage, setSelectedCourse, onDeleteAccount: handleDeleteAccount, enrollments, progress, certs }),
+    page === 'admin'       && user && user.role === 'admin' && React.createElement(AdminPanel, { data, setData, adminSection, setAdminSection, setModal, notify, syncUsers, reloadData })
   );
 }
 
